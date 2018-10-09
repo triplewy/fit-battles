@@ -1,20 +1,51 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView, ScrollView, ListView, View, Image, CameraRoll, Text, StyleSheet } from 'react-native';
+import ViewPhotos from './ViewPhotos.js'
 
 export default class Upload extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      photos: []
+    };
+
+    this.getGallery = this.getGallery.bind(this)
+  }
+
+  componentDidMount() {
+    this.getGallery()
+  }
+
+  getGallery(e) {
+    CameraRoll.getPhotos({
+       first: 20,
+       assetType: 'Photos',
+     })
+     .then(r => {
+       this.setState({ photos: r.edges });
+     })
+     .catch((err) => {
+       console.log(err);
+        //Error Loading Images
+     })
+  }
+
   render() {
     return (
-      <View>
+      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
         <Text style={styles.textFirst}> UPLOAD </Text>
-      </View>
-    );
+          {this.state.photos &&
+            <ViewPhotos photos={this.state.photos} />
+          }
+      </SafeAreaView>
+    )
   }
 }
 const styles = StyleSheet.create({
   textFirst: {
-  fontSize: 50,
-  fontWeight: 'bold',
-  textAlign: 'center',
-  marginTop: 300,
+    fontSize: 24,
+    fontWeight: '300',
+    textAlign: 'center',
   },
 });
