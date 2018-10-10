@@ -9,7 +9,9 @@ var path = require('path');
 var colors = require('colors');
 var cookieParser = require('cookie-parser')
 var mysql = require('mysql')
+var aws = require('aws-sdk')
 var multer = require('multer');
+var multerS3 = require('multer-s3')
 var passport = require('passport');
 var uuidv1 = require('uuid/v1');
 var bcrypt = require('bcrypt');
@@ -27,6 +29,7 @@ var sessionStore = new RedisStore({
   client: client
 })
 
+var s3 = new aws.S3()
 var app = express();
 var server = http.createServer(app)
 
@@ -62,17 +65,23 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 })
 
-var storage =  multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/images/')
-  },
-  filename: function (req, file, cb) {
-    cb(null, uuidv1() + '.jpg')
-  }
-})
+// var storage =  multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'public/images/')
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, uuidv1() + '.jpg')
+//   }
+// })
 
 var upload = multer({
-  storage: storage,
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.S3_BUCKET,
+    key: function (req, file, cb) {
+      cb(null, uuidv1() + '.jpg')
+    }
+  }),
   limits: {fileSize: 10000000, files: 1},
   fileFilter: function(request, file, callback) {
      var mime = file.mimetype
@@ -109,47 +118,31 @@ conn.query('SET foreign_key_checks = 0')
 conn.query('DROP TABLE IF EXISTS users')
 conn.query('DROP TABLE IF EXISTS logins')
 conn.query('DROP TABLE IF EXISTS posts')
+conn.query('DROP TABLE IF EXISTS votes')
 conn.query('SET foreign_key_checks = 1')
 
 conn.query('CREATE TABLE IF NOT EXISTS users (userId INTEGER AUTO_INCREMENT PRIMARY KEY, profileName TEXT NOT NULL, location TEXT, followers INTEGER NOT NULL DEFAULT 0, following INTEGER NOT NULL DEFAULT 0, numPosts INTEGER NOT NULL DEFAULT 0, about TEXT, createdDate DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)')
 conn.query('CREATE TABLE IF NOT EXISTS logins (loginId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER NOT NULL, network TEXT, networkId TEXT, accessToken TEXT, email VARCHAR(255) UNIQUE, passwordHash CHAR(60), verificationHash CHAR(60), verified BOOLEAN NOT NULL DEFAULT FALSE, FOREIGN KEY (userId) REFERENCES users(userId));')
 conn.query('CREATE TABLE IF NOT EXISTS posts (mediaId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER NOT NULL, imageUrl VARCHAR(255) NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, profileName TEXT NOT NULL, wins INTEGER DEFAULT 0, losses INTEGER DEFAULT 0, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (userId) REFERENCES users(userId));')
+conn.query('CREATE TABLE IF NOT EXISTS votes (voteId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER, winMediaId INTEGER NOT NULL, lossMediaId INTEGER NOT NULL, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (winMediaId) REFERENCES posts(mediaId), FOREIGN KEY (lossMediaId) REFERENCES posts(mediaId), FOREIGN KEY (userId) REFERENCES users(userId));')
 
 conn.query('CREATE TRIGGER before_posts_insert BEFORE INSERT ON posts FOR EACH ROW BEGIN ' +
 'DECLARE newProfileName TEXT; ' +
 'SELECT profileName INTO newProfileName FROM users WHERE userId = NEW.userId; ' +
 'SET NEW.profileName = newProfileName; END;')
 
-
-conn.query('INSERT INTO users (profileName, location, about) VALUES (?, ?, ?)', ['YUSHUF', 'Boston', 'Yuh'], function(err, result) {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("Records successfully added");
-  }
-})
-
-bcrypt.hash('password', 10, function(err, hash) {
-  conn.query('INSERT INTO logins (email, passwordHash, userId) VALUES (?,?,?)',
-    ['the.real.yushuf@gmail.com', hash, 1], function(err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Records successfully added");
-    }
-  })
-})
-
-
 var uploadRoutes = require('./routes/uploadRoutes')
 var authRoutes = require('./routes/authRoutes')
 var profileRoutes = require('./routes/profileRoutes')
 var battleRoutes = require('./routes/battleRoutes')
+var testData = require('./routes/testData')
 
 app.get('/api/sessionLogin', loggedIn, (req, res) => {
   console.log('- Request received:', req.method.cyan, '/api/sessionLogin');
   res.send(req.user)
 })
+
+testData(conn)
 
 app.use('/api/upload', uploadRoutes(upload, conn, loggedIn))
 
