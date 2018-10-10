@@ -70,7 +70,7 @@ export default class TabNavigator extends React.Component {
           screen: Feed
         },
         Profile: {
-          screen: props => <Profile {...props} setUserId={this.setUserId} />
+          screen: props => <Profile {...props} setUserId={this.setUserId} userId={this.state.userId}/>
         }
       },
       {
@@ -81,7 +81,7 @@ export default class TabNavigator extends React.Component {
         inactiveTintColor: '#666',
         tabBarOptions: {
           tabStyle: {
-            // flex: 1,
+            flex: 1,
             // flexDirection: 'row',
             // alignItems: 'center',
             justifyContent: 'center'

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 const url = 'http://localhost:8081'
 
+// CAN ACCESS userId FROM this.props.userId
 export default class Profile extends React.Component {
   constructor(props) {
     super(props);
@@ -12,6 +13,10 @@ export default class Profile extends React.Component {
     };
 
     this.logout = this.logout.bind(this)
+  }
+
+  componentDidMount() {
+    //HAVE API CALL TO SERVER FETCHING PROFILE INFORMATION
   }
 
   logout(e) {

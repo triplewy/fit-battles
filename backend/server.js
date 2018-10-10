@@ -143,29 +143,21 @@ bcrypt.hash('password', 10, function(err, hash) {
 
 var uploadRoutes = require('./routes/uploadRoutes')
 var authRoutes = require('./routes/authRoutes')
+var profileRoutes = require('./routes/profileRoutes')
+var battleRoutes = require('./routes/battleRoutes')
 
 app.get('/api/sessionLogin', loggedIn, (req, res) => {
   console.log('- Request received:', req.method.cyan, '/api/sessionLogin');
   res.send(req.user)
 })
 
-app.get('/api/battles', (req, res) => {
-  console.log('- Request received:', req.method.cyan, '/api/battles');
-
-  console.log(req.user);
-  conn.query('SELECT * FROM posts', [], function(err, result) {
-    if (err) {
-      console.log(err);
-      res.send({message: 'error'})
-    } else {
-      res.send(result)
-    }
-  })
-})
-
 app.use('/api/upload', uploadRoutes(upload, conn, loggedIn))
 
 app.use('/api/auth', authRoutes(passport, conn, loggedIn))
+
+app.use('/api/profile', profileRoutes(conn, loggedIn))
+
+app.use('/api/battles', battleRoutes(conn, loggedIn))
 
 server.listen(8081, function(){
     console.log('- Server listening on port 8081');
