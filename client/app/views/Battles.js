@@ -36,7 +36,7 @@ export default class Battles extends React.Component {
     if (this.state.battleData.length > 0) {
       return (
         <View>
-          <Text style={styles.textFirst}>{this.state.battleData}</Text>
+          <Text style={styles.textFirst}>BATTLES</Text>
         </View>
       )
     } else {

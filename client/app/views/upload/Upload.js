@@ -32,11 +32,12 @@ export default class Upload extends React.Component {
   }
 
   render() {
+    const navigation = this.props.navigation
     return (
       <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
         <Text style={styles.textFirst}> UPLOAD </Text>
           {this.state.photos &&
-            <ViewPhotos photos={this.state.photos} />
+            <ViewPhotos photos={this.state.photos} navigation={navigation}/>
           }
       </SafeAreaView>
     )

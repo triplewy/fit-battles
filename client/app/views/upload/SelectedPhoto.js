@@ -20,7 +20,7 @@ export default class SelectedPhoto extends React.Component {
   upload() {
     const selectedPhoto = this.props.selectedPhoto
     var formData = new FormData();
-    formData.append('image', this.props.selectedPhoto.uri, "file")
+    formData.append('image', {uri: this.props.selectedPhoto.uri, name: "file"})
     formData.append('width', selectedPhoto.width);
     formData.append('height', selectedPhoto.height);
     this.setState({uploadClicked: true})
@@ -35,13 +35,15 @@ export default class SelectedPhoto extends React.Component {
      if(xhr.readyState === 4 && xhr.status === 200){
          console.log(xhr.responseText);
          this.setState({uploaded: true})
+         const navigation = this.props.navigation
+         navigation.navigate('Profile')
       }
     }
 
     xhr.upload.onprogress = (e) => {
       console.log("loaded", e.loaded);
       console.log("total", e.total);
-      this.setState({progress: e.loaded/e.total})
+      this.setState({progress: e.loaded/e.total * 100})
     }
 
     xhr.open('POST', url + '/api/upload');
@@ -52,6 +54,7 @@ export default class SelectedPhoto extends React.Component {
     const selectedPhoto = this.props.selectedPhoto
     const win = Dimensions.get('window');
     const ratio = win.width/selectedPhoto.width
+
     return (
       <View>
         <Image
@@ -61,8 +64,11 @@ export default class SelectedPhoto extends React.Component {
         <TouchableOpacity onPress={this.upload}>
           <Text>Upload</Text>
         </TouchableOpacity>
-      </View>
+        <View style={{width: this.state.progress + '%', height: 20, backgroundColor: 'green'}}>
 
+        </View>
+      </View>
     )
+
   }
 }

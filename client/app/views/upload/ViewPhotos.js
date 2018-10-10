@@ -33,7 +33,7 @@ export default class ViewPhotos extends React.Component {
   render() {
     if (this.state.selectedPhoto) {
       return (
-        <SelectedPhoto selectedPhoto={this.state.selectedPhoto} />
+        <SelectedPhoto selectedPhoto={this.state.selectedPhoto} navigation={this.props.navigation}/>
       )
     } else {
       return (
