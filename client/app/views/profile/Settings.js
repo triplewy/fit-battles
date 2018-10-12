@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 const url = 'http://localhost:8081'
 
@@ -37,11 +37,14 @@ export default class Settings extends React.Component {
 
   render() {
     return (
-      <View>
+      <SafeAreaView>
+        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+          <Text>Back</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={this.logout}>
           <Text>Logout</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     );
   }
 }

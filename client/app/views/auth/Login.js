@@ -45,10 +45,11 @@ export default class Login extends React.Component {
   render() {
     return (
       <SafeAreaView style={{flex: 1}}>
-        <TouchableOpacity
-          onPress={() => this.props.navigation.navigate('Signup')}
-        >
-          <Text>Signup</Text>
+        <TouchableOpacity onPress={() => this.props.navigation.navigate('Tabs')}>
+          <Text>Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.props.navigation.navigate('Signup')}>
+          <Text>Don't have an account? Sign up here!</Text>
         </TouchableOpacity>
         <Text style={styles.textFirst}> LOGIN </Text>
         <FormLabel>Email</FormLabel>

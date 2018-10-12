@@ -14,6 +14,18 @@ module.exports = function(conn, loggedIn) {
       })
     })
 
+    leaderboardRoutes.get('/:userId/header', (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/leaderboard/header');
+      const userId = req.params.userId
+      Promise.all([getDailyRank(userId), getWeeklyRank(userId), getAllTimeRank(userId)])
+      .then(function(allData) {
+        res.send({dailyRank: allData[0].dailyRank, weeklyRank: allData[1].weeklyRank, allTimeRank: allData[2].allTimeRank})
+      })
+      .catch(e => {
+        console.log(e);
+      })
+    })
+
     function getDailyRank(userId) {
       return new Promise(function(resolve, reject) {
         conn.query('SELECT COUNT(*) AS dailyRank FROM posts WHERE (wins * 1.0 / matches) > ' +

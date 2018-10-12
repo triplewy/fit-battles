@@ -57,6 +57,7 @@ export default class Card extends React.Component {
         </DoubleTap>
         <View>
           <Text style={{marginTop: 10, marginBottom: 10, marginLeft: 10, fontWeight: '300', fontSize: 18}}>{this.props.profileName}</Text>
+          <Text>{this.props.location}</Text>
           {this.props.isPoster ?
             null
             :

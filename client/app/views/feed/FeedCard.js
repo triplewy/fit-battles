@@ -89,8 +89,9 @@ export default class FeedCard extends React.Component {
           />
         </DoubleTap>
         <View>
-          <Text style={{marginTop: 10, marginBottom: 10, marginLeft: 10, fontWeight: '300', fontSize: 18}}>{this.props.profileName}</Text>
-          <Text>{this.props.followers + 'followers'}</Text>
+          <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
+            <Text style={{marginTop: 10, marginBottom: 10, marginLeft: 10, fontWeight: '300', fontSize: 18}}>{this.props.profileName}</Text>
+          </TouchableOpacity>
           <Text>{this.state.wins + 'wins'}</Text>
           <Text>{this.state.matches + 'matches'}</Text>
           <Text>{this.state.voted ? 'Voted' : 'Vote'}</Text>

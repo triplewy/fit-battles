@@ -47,10 +47,8 @@ export default class Signup extends React.Component {
   render() {
     return (
       <SafeAreaView>
-        <TouchableOpacity
-          onPress={() => this.props.navigation.navigate('Login')}
-        >
-          <Text>Login</Text>
+        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+          <Text>Back</Text>
         </TouchableOpacity>
         <Text style={styles.textFirst}> SIGNUP </Text>
         <FormLabel>Email</FormLabel>

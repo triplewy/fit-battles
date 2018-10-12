@@ -135,6 +135,7 @@ export default class Battles extends React.Component {
       if (this.state.battleData.length > 0) {
         return (
           <SafeAreaView>
+            <Text>Battle</Text>
             <Carousel
               ref={(c) => { this.carousel = c }}
               data={this.state.battleData[this.state.currentBattle]}

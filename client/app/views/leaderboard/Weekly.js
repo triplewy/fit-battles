@@ -37,7 +37,7 @@ export default class Weekly extends React.Component {
 
   renderItem(item) {
     return (
-      <LeaderboardUser user={item.item} index={item.index} />
+      <LeaderboardUser user={item.item} index={item.index} navigation={this.props.navigation} />
     )
   }
 

@@ -8,6 +8,7 @@ import Upload from '../views/upload/Upload.js'
 import Feed from '../views/feed/Feed.js'
 import Profile from '../views/profile/Profile.js'
 import Settings from '../views/profile/Settings.js'
+import Edit from '../views/profile/Edit.js'
 import Login from '../views/auth/Login.js'
 import Signup from '../views/auth/Signup.js'
 
@@ -51,80 +52,174 @@ export default class TabNavigator extends React.Component {
   }
 
   render() {
-    const AuthNavigator = createSwitchNavigator(
+    const AuthNavigator = createStackNavigator(
       {
         Login: props => <Login {...props} setUserId={this.setUserId} />,
         Signup: props => <Signup {...props} setUserId={this.setUserId} />,
+      },
+      {
+        cardStyle: {
+          backgroundColor: 'white'
+        },
+        headerMode: 'none',
+        navigationOptions: {
+          headerVisible: false
+        }
       }
-    );
+    )
+
+    const DailyNavigator = createStackNavigator(
+      {
+        Daily: Daily,
+        UserProfile: Profile
+      },
+      {
+        cardStyle: {
+          backgroundColor: 'white'
+        },
+        headerMode: 'none',
+        navigationOptions: {
+          headerVisible: false
+        }
+      }
+    )
+
+    const WeeklyNavigator = createStackNavigator(
+      {
+        Weekly: Weekly,
+        UserProfile: Profile
+      },
+      {
+        cardStyle: {
+          backgroundColor: 'white'
+        },
+        headerMode: 'none',
+        navigationOptions: {
+          headerVisible: false
+        }
+      }
+    )
+
+    const AllTimeNavigator = createStackNavigator(
+      {
+        AllTime: AllTime,
+        UserProfile: Profile
+      },
+      {
+        cardStyle: {
+          backgroundColor: 'white'
+        },
+        headerMode: 'none',
+        navigationOptions: {
+          headerVisible: false
+        }
+      }
+    )
 
     const LeaderboardNavigator = createMaterialTopTabNavigator(
       {
-        Daily: Daily,
-        Weekly: Weekly,
-        AllTime: AllTime
+        Daily: DailyNavigator,
+        Weekly: WeeklyNavigator,
+        AllTime: AllTimeNavigator
       },
       {
-        lazy: true
+        lazy: true,
+        tabBarOptions: {
+          labelStyle: {
+            color: 'blue'
+          },
+          style: {
+            backgroundColor: 'white',
+            marginTop: 10
+          }
+        }
       }
     )
 
     const ProfileNavigator = createStackNavigator(
       {
         Profile: {
-          screen: props => <Profile {...props} userId={this.state.userId} />
+          screen: Profile
         },
         Settings: {
-          screen: props => <Settings {...props} setUserId={this.setUserId} userId={this.state.userId} />
-        }
+          screen: props => <Settings {...props} setUserId={this.setUserId} />
+        },
+        Edit: Edit
       },
       {
         cardStyle: {
           backgroundColor: 'white'
         },
+        headerMode: 'none',
         navigationOptions: {
-          headerStyle: {
-            shadowColor: 'transparent',
-            borderBottomWidth: 0
-          }
+          headerVisible: false
         }
       }
     )
 
-    const Tabs = createBottomTabNavigator(
+    const FeedNavigator = createStackNavigator(
       {
-        Battles: {
-          screen: Battles
-        },
-        Leaderboard: {
-          screen: LeaderboardNavigator
-        },
-        Upload: {
-          screen: this.state.userId ? Upload : AuthNavigator
-        },
-        Feed: {
-          screen: props => <Feed {...props} userId={this.state.userId} />
-        },
-        Profile: {
-          screen: ProfileNavigator
-        }
+        Feed: props => <Feed {...props} userId={this.state.userId} />,
+        UserProfile: Profile
       },
       {
-        tabBarPosition: 'bottom',
-        swipeEnabled: true,
-        animationEnabled: true,
-        activeTintColor: '#2EC4B6',
-        inactiveTintColor: '#666',
-        tabBarOptions: {
-          tabStyle: {
-            flex: 1,
-            // flexDirection: 'row',
-            // alignItems: 'center',
-            justifyContent: 'center'
+        cardStyle: {
+          backgroundColor: 'white'
+        },
+        headerMode: 'none',
+        navigationOptions: {
+          headerVisible: false
+        }
+      }
+    )
+
+    const Tabs = createStackNavigator(
+      {
+        Tabs: createBottomTabNavigator(
+          {
+            Battles: {
+              screen: Battles
+            },
+            Leaderboard: {
+              screen: LeaderboardNavigator
+            },
+            Upload: {
+              screen: props => <Upload {...props} userId={this.state.userId} />
+            },
+            Feed: {
+              screen: FeedNavigator
+            },
+            Profile: {
+              screen: ProfileNavigator
+            }
           },
-          labelStyle: {
-            fontSize: 14
+          {
+            tabBarPosition: 'bottom',
+            swipeEnabled: true,
+            animationEnabled: true,
+            activeTintColor: '#2EC4B6',
+            inactiveTintColor: '#666',
+            tabBarOptions: {
+              tabStyle: {
+                flex: 1,
+                justifyContent: 'center'
+              },
+              labelStyle: {
+                fontSize: 14
+              }
+            }
           }
+        ),
+        Auth: AuthNavigator,
+        UserProfile: Profile
+      },
+      {
+        headerMode: 'none',
+        cardStyle: {
+          backgroundColor: 'white'
+        },
+        navigationOptions: {
+          headerVisible: false
         }
       }
     )

@@ -17,7 +17,7 @@ export default class LeaderboardUser extends React.Component {
     const user = this.props.user
 
     return (
-      <TouchableHighlight>
+      <TouchableHighlight onPress={() => this.props.navigation.navigate('UserProfile', {userId: user.userId})}>
         <View style={{width: win.width, height: 50}}>
           <Text>{user.profileName}</Text>
           <Text>{user.followers + 'followers'}</Text>

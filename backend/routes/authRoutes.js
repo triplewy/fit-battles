@@ -7,6 +7,7 @@ module.exports = function(passport, conn, loggedIn) {
     var bcrypt = require('bcrypt');
     var validator = require('validator');
     var randomstring = require('randomstring')
+    var shortId = require('shortid');
 
     passport.use('local-login', new LocalStrategy(
      function(email, password, done) {
@@ -40,7 +41,7 @@ module.exports = function(passport, conn, loggedIn) {
         }
         bcrypt.hash(password, 10, function(err, passwordHash) {
           bcrypt.hash(randomstring.generate(), 10, function(err, verificationHash) {
-            conn.query('INSERT INTO users (profileName) VALUES (?)', [email], function(err, result) {
+            conn.query('INSERT INTO users (profileName) VALUES (?)', [shortId.generate()], function(err, result) {
               if (err) {
                 return done(err)
               } else {

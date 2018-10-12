@@ -39,7 +39,7 @@ export default class Daily extends React.Component {
     const win = Dimensions.get('window');
     const ratio = (win.width/2)/post.width
     return (
-      <TouchableHighlight>
+      <TouchableHighlight onPress={() => this.props.navigation.navigate('UserProfile', {userId: post.userId})}>
         <Image
           source={{ uri: post.imageUrl }}
           style={{width: win.width/2, height: post.height * ratio}} />

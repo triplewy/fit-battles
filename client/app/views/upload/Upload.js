@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, ListView, View, Image, CameraRoll, Text, StyleSheet } from 'react-native';
+import { SafeAreaView, ScrollView, ListView, View, Image, CameraRoll, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import ViewPhotos from './ViewPhotos.js'
 
 export default class Upload extends React.Component {
@@ -33,14 +33,25 @@ export default class Upload extends React.Component {
 
   render() {
     const navigation = this.props.navigation
-    return (
-      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
-        <Text style={styles.textFirst}> UPLOAD </Text>
-          {this.state.photos &&
-            <ViewPhotos photos={this.state.photos} navigation={navigation}/>
-          }
-      </SafeAreaView>
-    )
+    if (this.props.userId) {
+      return (
+        <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+          <Text style={styles.textFirst}> UPLOAD </Text>
+            {this.state.photos &&
+              <ViewPhotos photos={this.state.photos} navigation={navigation}/>
+            }
+        </SafeAreaView>
+      )
+    } else {
+      return (
+        <SafeAreaView>
+          <TouchableOpacity onPress={() => navigation.navigate('Auth')}>
+            <Text>To upload please login or signup</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      )  
+    }
+
   }
 }
 const styles = StyleSheet.create({

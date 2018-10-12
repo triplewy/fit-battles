@@ -10,11 +10,13 @@ module.exports = function(conn, loggedIn) {
       }
 
       if (userId) {
-        conn.query('SELECT *, ' +
-        '((SELECT COUNT(*) FROM following WHERE followingUserId = posts.userId AND followerUserId = :userId) > 0) AS following, ' +
-        '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = posts.userId) > 0) AS followsYou, ' +
-        '(posts.userId = :userId) AS isPoster '  +
-        'FROM posts WHERE dateTime >= CURRENT_DATE() AND dateTime <= NOW() ORDER BY NOW() - dateTime ASC LIMIT 10', {userId: userId}, function(err, result) {
+        conn.query('SELECT a.*, b.location, ' +
+        '((SELECT COUNT(*) FROM following WHERE followingUserId = a.userId AND followerUserId = :userId) > 0) AS following, ' +
+        '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = a.userId) > 0) AS followsYou, ' +
+        '(a.userId = :userId) AS isPoster '  +
+        'FROM posts AS a ' +
+        'JOIN users AS b ON b.userId = a.userId ' +
+        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY NOW() - a.dateTime ASC LIMIT 10', {userId: userId}, function(err, result) {
           if (err) {
             console.log(err);
             res.send({message: 'error'})
@@ -31,7 +33,8 @@ module.exports = function(conn, loggedIn) {
           }
         })
       } else {
-        conn.query('SELECT * FROM posts WHERE dateTime >= CURRENT_DATE() AND dateTime <= NOW() ORDER BY NOW() - dateTime ASC LIMIT 10', [], function(err, result) {
+        conn.query('SELECT a.*, b.location FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
+        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY NOW() - a.dateTime ASC LIMIT 10', [], function(err, result) {
           if (err) {
             console.log(err);
             res.send({message: 'error'})

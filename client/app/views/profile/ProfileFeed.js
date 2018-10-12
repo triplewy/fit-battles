@@ -1,10 +1,10 @@
 import React from 'react';
 import {Dimensions, Image, View, SafeAreaView, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
-import FeedCard from './FeedCard'
+import FeedCard from '../feed/FeedCard'
 
 const url = 'http://localhost:8081'
 
-export default class Feed extends React.Component {
+export default class ProfileFeed extends React.Component {
   constructor(props) {
     super(props);
 
@@ -22,12 +22,19 @@ export default class Feed extends React.Component {
   }
 
   fetchFeed() {
+    const params = this.props.navigationParams
+    var userProfile = ''
+    if (params) {
+      userProfile = '/' + params.userId
+    }
+
     this.setState({refreshing: true})
-    fetch(url + '/api/feed', {
+    fetch(url + '/api/profile' + userProfile + '/feed', {
       credentials: 'include'
     })
     .then(res => res.json())
     .then(data => {
+      console.log(data);
       this.setState({feed: data, refreshing: false})
     })
     .catch((error) => {
@@ -40,34 +47,20 @@ export default class Feed extends React.Component {
     const win = Dimensions.get('window');
     const ratio = win.width/post.width
     return (
-      <FeedCard {...post} navigation={this.props.navigation} />
+      <FeedCard {...post} />
     )
   }
 
   render() {
-    if (this.props.userId) {
-      return (
-        <SafeAreaView>
-          <Text>Feed</Text>
-          <FlatList
-            data={this.state.feed}
-            renderItem={this.renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            refreshing={this.state.refreshing}
-            onRefresh={this.fetchFeed.bind(this)}
-          />
-        </SafeAreaView>
-      )
-    } else {
-      return (
-        <SafeAreaView>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('Auth')}>
-            <Text>Login to follow users you like!</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
-      )
-    }
-
+    return (
+      <FlatList
+        data={this.state.feed}
+        renderItem={this.renderItem}
+        keyExtractor={(item, index) => index.toString()}
+        refreshing={this.state.refreshing}
+        onRefresh={this.fetchFeed.bind(this)}
+      />
+    )
   }
 }
 

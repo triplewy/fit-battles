@@ -19,7 +19,13 @@ export default class Rankings extends React.Component {
   }
 
   fetchLeaderboardHeader() {
-    fetch(url + '/api/leaderboard/header', {
+    const params = this.props.navigationParams
+    var userProfile = ''
+    if (params) {
+      userProfile = '/' + params.userId
+    }
+
+    fetch(url + '/api/leaderboard' + userProfile + '/header', {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -32,33 +38,24 @@ export default class Rankings extends React.Component {
   }
 
   render() {
-    if (this.props.userId) {
-      if (this.state.ranks) {
-        const ranks = this.state.ranks
-        return (
-          <SafeAreaView>
-            <View>
-              <Text>Daily Rank</Text>
-              <Text>{ranks.dailyRank}</Text>
-              <Text>Weekly Rank</Text>
-              <Text>{ranks.weeklyRank}</Text>
-              <Text>All Time Rank</Text>
-              <Text>{ranks.allTimeRank}</Text>
-            </View>
-          </SafeAreaView>
-        )
-      } else {
-        return (
-          <SafeAreaView>
-            <Text>Loading</Text>
-          </SafeAreaView>
-        )
-      }
-    }
-     else {
+    if (this.state.ranks) {
+      const ranks = this.state.ranks
       return (
         <SafeAreaView>
-          <Text>Please log in to see ranks</Text>
+          <View>
+            <Text>Daily Rank</Text>
+            <Text>{ranks.dailyRank}</Text>
+            <Text>Weekly Rank</Text>
+            <Text>{ranks.weeklyRank}</Text>
+            <Text>All Time Rank</Text>
+            <Text>{ranks.allTimeRank}</Text>
+          </View>
+        </SafeAreaView>
+      )
+    } else {
+      return (
+        <SafeAreaView>
+          <Text>Loading</Text>
         </SafeAreaView>
       )
     }
