@@ -119,27 +119,40 @@ conn.query('DROP TABLE IF EXISTS users')
 conn.query('DROP TABLE IF EXISTS logins')
 conn.query('DROP TABLE IF EXISTS posts')
 conn.query('DROP TABLE IF EXISTS votes')
+conn.query('DROP TABLE IF EXISTS following')
 conn.query('SET foreign_key_checks = 1')
 
 conn.query('CREATE TABLE IF NOT EXISTS users (userId INTEGER AUTO_INCREMENT PRIMARY KEY, profileName TEXT NOT NULL, location TEXT, followers INTEGER NOT NULL DEFAULT 0, following INTEGER NOT NULL DEFAULT 0, numPosts INTEGER NOT NULL DEFAULT 0, about TEXT, createdDate DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)')
 conn.query('CREATE TABLE IF NOT EXISTS logins (loginId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER NOT NULL, network TEXT, networkId TEXT, accessToken TEXT, email VARCHAR(255) UNIQUE, passwordHash CHAR(60), verificationHash CHAR(60), verified BOOLEAN NOT NULL DEFAULT FALSE, FOREIGN KEY (userId) REFERENCES users(userId));')
-conn.query('CREATE TABLE IF NOT EXISTS posts (mediaId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER NOT NULL, imageUrl VARCHAR(255) NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, profileName TEXT NOT NULL, wins INTEGER DEFAULT 0, losses INTEGER DEFAULT 0, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (userId) REFERENCES users(userId));')
-conn.query('CREATE TABLE IF NOT EXISTS votes (voteId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER, winMediaId INTEGER NOT NULL, lossMediaId INTEGER NOT NULL, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (winMediaId) REFERENCES posts(mediaId), FOREIGN KEY (lossMediaId) REFERENCES posts(mediaId), FOREIGN KEY (userId) REFERENCES users(userId));')
+conn.query('CREATE TABLE IF NOT EXISTS posts (mediaId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER NOT NULL, imageUrl VARCHAR(255) NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, profileName TEXT NOT NULL, wins INTEGER DEFAULT 0, matches INTEGER DEFAULT 0, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (userId) REFERENCES users(userId));')
+conn.query('CREATE TABLE IF NOT EXISTS votes (voteId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER, winMediaId INTEGER NOT NULL, winUserId INTEGER NOT NULL, lossMediaId INTEGER, lossUserId INTEGER, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (winMediaId) REFERENCES posts(mediaId), FOREIGN KEY (lossMediaId) REFERENCES posts(mediaId), ' +
+'FOREIGN KEY (winUserId) REFERENCES users(userId), FOREIGN KEY (lossUserId) REFERENCES users(userId), FOREIGN KEY (userId) REFERENCES users(userId), UNIQUE(userId, winMediaId));')
+conn.query('CREATE TABLE IF NOT EXISTS following (followingId INTEGER AUTO_INCREMENT PRIMARY KEY, followerUserId INTEGER NOT NULL, followingUserId INTEGER NOT NULL, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (followerUserId) REFERENCES users(userId), FOREIGN KEY (followingUserId) REFERENCES users(userId), UNIQUE(followerUserId, followingUserId))')
 
 conn.query('CREATE TRIGGER before_posts_insert BEFORE INSERT ON posts FOR EACH ROW BEGIN ' +
 'DECLARE newProfileName TEXT; ' +
 'SELECT profileName INTO newProfileName FROM users WHERE userId = NEW.userId; ' +
 'SET NEW.profileName = newProfileName; END;')
 
+conn.query('CREATE TRIGGER after_votes_insert AFTER INSERT ON votes FOR EACH ROW BEGIN ' +
+'DECLARE winPostWins INTEGER; DECLARE winPostMatches INTEGER; DECLARE lossPostMatches INTEGER; ' +
+'SELECT SUM(CASE WHEN winMediaId = NEW.winMediaId THEN 1 ELSE 0 END), COUNT(*) INTO @winPostWins, @winPostMatches FROM votes WHERE winMediaId = NEW.winMediaId OR lossMediaId = NEW.winMediaId; ' +
+'SELECT COUNT(*) INTO @lossPostMatches FROM votes WHERE winMediaId = NEW.lossMediaId OR lossMediaId = NEW.lossMediaId; ' +
+'UPDATE posts SET wins = @winPostWins, matches = @winPostMatches WHERE mediaId = NEW.winMediaId; ' +
+'UPDATE posts SET matches = @lossPostMatches WHERE mediaId = NEW.lossMediaId; END;')
+
 var uploadRoutes = require('./routes/uploadRoutes')
 var authRoutes = require('./routes/authRoutes')
 var profileRoutes = require('./routes/profileRoutes')
 var battleRoutes = require('./routes/battleRoutes')
+var leaderboardRoutes = require('./routes/leaderboardRoutes')
+var feedRoutes = require('./routes/feedRoutes')
+var cardRoutes = require('./routes/cardRoutes')
 var testData = require('./routes/testData')
 
 app.get('/api/sessionLogin', loggedIn, (req, res) => {
   console.log('- Request received:', req.method.cyan, '/api/sessionLogin');
-  res.send(req.user)
+  res.send({userId: req.user})
 })
 
 testData(conn)
@@ -151,6 +164,12 @@ app.use('/api/auth', authRoutes(passport, conn, loggedIn))
 app.use('/api/profile', profileRoutes(conn, loggedIn))
 
 app.use('/api/battles', battleRoutes(conn, loggedIn))
+
+app.use('/api/leaderboard', leaderboardRoutes(conn, loggedIn))
+
+app.use('/api/feed', feedRoutes(conn, loggedIn))
+
+app.use('/api/card', cardRoutes(conn, loggedIn))
 
 server.listen(8081, function(){
     console.log('- Server listening on port 8081');

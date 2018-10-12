@@ -1,35 +1,9 @@
 import React from 'react';
 import { Dimensions, SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, TouchableHighlight } from 'react-native';
-import Swiper from 'react-native-deck-swiper'
+import Card from './Card'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
+
 const url = 'http://localhost:8081'
-
-class Card extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const win = Dimensions.get('window');
-    const ratio = (win.width - 20)/this.props.width
-    return (
-      <View style={{backgroundColor: 'white', borderRadius: 8, alignItems: 'center'}}>
-        <TouchableHighlight onPress={this.props.handleVote}>
-          <Image
-            source={{uri: this.props.imageUrl}}
-            style={{width: win.width - 20, height: ratio * this.props.height, borderRadius: 8}}
-          />
-        </TouchableHighlight>
-        <View>
-          <Text style={{marginTop: 10, marginBottom: 10, marginLeft: 10, fontWeight: '300', fontSize: 18}}>{this.props.profileName}</Text>
-          <TouchableOpacity>
-            <Text>Follow</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    )
-  }
-}
 
 export default class Battles extends React.Component {
   constructor(props) {
@@ -38,13 +12,13 @@ export default class Battles extends React.Component {
     this.state = {
       battleData: [],
       currentBattle: 0,
-      activeSlide: 0
+      activeSlide: 0,
+      endOfBattles: false
     };
 
     this.fetchBattles = this.fetchBattles.bind(this)
     this.renderItem = this.renderItem.bind(this)
     this.handleVote = this.handleVote.bind(this)
-    this.swiperRef = React.createRef();
   }
 
   componentDidMount() {
@@ -58,19 +32,29 @@ export default class Battles extends React.Component {
   }
 
   handleVote (index) {
-    this.setState({currentBattle: this.state.currentBattle + 1, activeSlide: 0})
+    if (this.state.currentBattle === this.state.battleData.length - 1) {
+      this.setState({endOfBattles: true})
+    } else {
+      this.setState({currentBattle: this.state.currentBattle + 1, activeSlide: 0})
+    }
     this.carousel.snapToItem(0)
     const currentBattle = this.state.battleData[this.state.currentBattle]
 
     var winMediaId = 0
+    var winUserId = 0
     var lossMediaId = 0
+    var lossUserId = 0
 
     if (index === 0) {
       winMediaId = currentBattle[0].mediaId
+      winUserId = currentBattle[0].userId
       lossMediaId = currentBattle[1].mediaId
+      lossUserId = currentBattle[1].userId
     } else {
       winMediaId = currentBattle[1].mediaId
+      winUserId = currentBattle[1].userId
       lossMediaId = currentBattle[0].mediaId
+      lossUserId = currentBattle[0].userId
     }
 
     fetch(url + '/api/battles/vote', {
@@ -82,7 +66,9 @@ export default class Battles extends React.Component {
       credentials: 'include',
       body: JSON.stringify({
         winMediaId: winMediaId,
-        lossMediaId: lossMediaId
+        winUserId: winUserId,
+        lossMediaId: lossMediaId,
+        lossUserId: lossUserId
       })
     })
     .then(res => res.json())
@@ -136,40 +122,39 @@ export default class Battles extends React.Component {
    }
 
   render() {
-    const config = {
-      velocityThreshold: 0.3,
-      directionalOffsetThreshold: 80
-    };
-
     const battleData = this.state.battleData
-
     const win = Dimensions.get('window');
 
-    const data = [{imageUrl: 'https://s3.us-east-2.amazonaws.com/drip.io-images/026bb3d0-c8ec-11e8-9709-7d3cd8d2ea97.jpg'}, {imageUrl: 'https://s3.us-east-2.amazonaws.com/drip.io-images/f9a3b6e0-c976-11e8-880d-a9d952d8880f.jpg'}]
-
-    if (this.state.battleData.length > 0) {
+    if (this.state.endOfBattles) {
       return (
         <SafeAreaView>
-          <Carousel
-            ref={(c) => { this.carousel = c }}
-            data={this.state.battleData[this.state.currentBattle]}
-            renderItem={this.renderItem}
-            sliderWidth={win.width}
-            itemWidth={win.width}
-            onSnapToItem={(index) => this.setState({activeSlide: index})}
-            layout={'default'}
-          />
-          {this.pagination}
+          <Text>End of battles</Text>
         </SafeAreaView>
       )
     } else {
-      return (
-        <SafeAreaView>
-          <Text>Loading</Text>
-        </SafeAreaView>
-      )
+      if (this.state.battleData.length > 0) {
+        return (
+          <SafeAreaView>
+            <Carousel
+              ref={(c) => { this.carousel = c }}
+              data={this.state.battleData[this.state.currentBattle]}
+              renderItem={this.renderItem}
+              sliderWidth={win.width}
+              itemWidth={win.width}
+              onSnapToItem={(index) => this.setState({activeSlide: index})}
+              layout={'default'}
+            />
+            {this.pagination}
+          </SafeAreaView>
+        )
+      } else {
+        return (
+          <SafeAreaView>
+            <Text>Loading</Text>
+          </SafeAreaView>
+        )
+      }
     }
-
   }
 }
 const styles = StyleSheet.create({
@@ -178,13 +163,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 300,
-  },
-  wrapper: {
-    height: 400
-  },
-  slide: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'transparent'
-  },
+  }
 });

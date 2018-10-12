@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimensions, Image, ScrollView, View, ListView, StyleSheet, Text, TouchableHighlight} from 'react-native';
+import {Dimensions, Image, View, FlatList, StyleSheet, Text, TouchableHighlight} from 'react-native';
 import SelectedPhoto from './SelectedPhoto';
 
 export default class ViewPhotos extends React.Component {
@@ -7,27 +7,29 @@ export default class ViewPhotos extends React.Component {
     super(props);
 
     this.state = {
-      ds: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}),
       selectedPhoto: null
     };
 
-    this.renderRow = this.renderRow.bind(this)
+    this.renderItem = this.renderItem.bind(this)
     this.setSelectedPhoto = this.setSelectedPhoto.bind(this)
   }
 
-  renderRow(rowData) {
-    const { uri } = rowData.node.image;
+  renderItem(item) {
+    const image = item.item.node.image;
+    console.log(image);
+    const win = Dimensions.get('window');
+    const ratio = (win.width/2)/image.width
     return (
-      <TouchableHighlight onPress={this.setSelectedPhoto.bind(this, uri)}>
+      <TouchableHighlight onPress={this.setSelectedPhoto.bind(this, image)}>
         <Image
-          source={{ uri: rowData.node.image.uri }}
-          style={styles.image} />
+          source={{ uri: image.uri }}
+          style={{width: win.width/2, height: image.height * ratio}} />
       </TouchableHighlight>
     )
   }
 
-  setSelectedPhoto(uri) {
-    Image.getSize(uri, (width, height) => {this.setState({selectedPhoto: {uri: uri, width: width, height: height}})});
+  setSelectedPhoto(image) {
+    this.setState({selectedPhoto: {uri: image.uri, width: image.width, height: image.height}})
   }
 
   render() {
@@ -37,15 +39,12 @@ export default class ViewPhotos extends React.Component {
       )
     } else {
       return (
-        <ScrollView>
-          <View style={{ flex: 1 }}>
-              <ListView
-                contentContainerStyle={styles.list}
-                dataSource={this.state.ds.cloneWithRows(this.props.photos)}
-                renderRow={(rowData) => this.renderRow(rowData)}
-                enableEmptySections={true} />
-          </View>
-        </ScrollView>
+        <FlatList
+          data={this.props.photos}
+          numColumns={2}
+          renderItem={this.renderItem}
+          keyExtractor={(item, index) => index}
+        />
       )
     }
   }
@@ -55,10 +54,5 @@ const styles = StyleSheet.create({
   list: {
     flexDirection: 'row',
     flexWrap: 'wrap'
-  },
-
-  image: {
-    width: 200,
-    height: 200,
   }
 })

@@ -1,10 +1,13 @@
 import React from 'react'
-import { createBottomTabNavigator, createSwitchNavigator } from 'react-navigation'
-import Battles from '../views/Battles.js'
-import Leaderboard from '../views/Leaderboard.js'
+import { createBottomTabNavigator, createMaterialTopTabNavigator, createSwitchNavigator, createStackNavigator } from 'react-navigation'
+import Battles from '../views/battle/Battles.js'
+import Daily from '../views/leaderboard/Daily.js'
+import Weekly from '../views/leaderboard/Weekly.js'
+import AllTime from '../views/leaderboard/AllTime.js'
 import Upload from '../views/upload/Upload.js'
-import Feed from '../views/Feed.js'
-import Profile from '../views/Profile.js'
+import Feed from '../views/feed/Feed.js'
+import Profile from '../views/profile/Profile.js'
+import Settings from '../views/profile/Settings.js'
 import Login from '../views/auth/Login.js'
 import Signup from '../views/auth/Signup.js'
 
@@ -23,7 +26,7 @@ export default class TabNavigator extends React.Component {
   }
 
   componentDidMount() {
-    console.log("Tab navigator mounted");
+    this.sessionLogin()
   }
 
   sessionLogin() {
@@ -48,12 +51,45 @@ export default class TabNavigator extends React.Component {
   }
 
   render() {
-    const AppNavigator = createSwitchNavigator(
+    const AuthNavigator = createSwitchNavigator(
       {
         Login: props => <Login {...props} setUserId={this.setUserId} />,
         Signup: props => <Signup {...props} setUserId={this.setUserId} />,
       }
     );
+
+    const LeaderboardNavigator = createStackNavigator(
+      {
+        Tabs: {
+          screen: createMaterialTopTabNavigator(
+            {
+              Daily: Daily,
+              Weekly: Weekly,
+              AllTime: AllTime
+            }
+          ),
+          navigationOptions: {
+            title: 'User Leaderboard Info'
+          }
+        }
+      },
+      {
+        navigationOptions:({ navigation }) => ({
+
+        })
+      }
+    )
+
+    const ProfileNavigator = createStackNavigator(
+      {
+        Profile: {
+          screen: props => <Profile {...props} setUserId={this.setUserId} userId={this.state.userId} />
+        },
+        Settings: {
+          screen: Settings
+        }
+      }
+    )
 
     const Tabs = createBottomTabNavigator(
       {
@@ -61,16 +97,16 @@ export default class TabNavigator extends React.Component {
           screen: Battles
         },
         Leaderboard: {
-          screen: Leaderboard
+          screen: LeaderboardNavigator
         },
         Upload: {
-          screen: this.state.userId ? Upload : AppNavigator
+          screen: this.state.userId ? Upload : AuthNavigator
         },
         Feed: {
-          screen: Feed
+          screen: props => <Feed {...props} userId={this.state.userId} />
         },
         Profile: {
-          screen: props => <Profile {...props} setUserId={this.setUserId} userId={this.state.userId}/>
+          screen: ProfileNavigator
         }
       },
       {
