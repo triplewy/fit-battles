@@ -3,59 +3,64 @@ import { SafeAreaView, View, Text, StyleSheet, TouchableHighlight, TouchableOpac
 
 const url = 'http://localhost:8081'
 
-// CAN ACCESS userId FROM this.props.userId
 export default class Profile extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-
+      profileInfo: {}
     };
 
-    this.logout = this.logout.bind(this)
+    this.fetchProfileInfo = this.fetchProfileInfo.bind(this)
   }
 
   componentDidMount() {
-    //HAVE API CALL TO SERVER FETCHING PROFILE INFORMATION
+    this.fetchProfileInfo()
   }
 
-  logout(e) {
-    fetch(url + '/api/auth/logout', {
-      method: 'POST',
+  componentDidUpdate(prevProps) {
+    if (this.props.userId !== prevProps.userId) {
+      this.fetchProfileInfo()
+    }
+  }
+
+  fetchProfileInfo() {
+    fetch(url + '/api/profile/info', {
       credentials: 'include'
     })
     .then(res => res.json())
     .then(data => {
-      if (data.message === 'success') {
-        this.props.setUserId(null)
-      } else {
-        console.log("logout failed");
-      }
+      this.setState({profileInfo: data})
     })
-    .catch(function(err) {
-        console.log(err);
+    .catch((error) => {
+      console.error(error);
     });
   }
 
   render() {
+    const profileInfo = this.state.profileInfo
     return (
       <SafeAreaView>
         <TouchableOpacity onPress={() => this.props.navigation.navigate('Settings')}>
           <Text>Settings</Text>
         </TouchableOpacity>
-        <Text style={styles.textFirst}> Profile </Text>
-        <TouchableOpacity onPress={this.logout}>
-          <Text>Logout</Text>
-        </TouchableOpacity>
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.textFirst}>{profileInfo.profileName}</Text>
+          <Text>{profileInfo.location}</Text>
+          <Text>{profileInfo.about}</Text>
+          <Text>{'followers'}</Text>
+          <Text>{profileInfo.followers}</Text>
+          <Text>{'following'}</Text>
+          <Text>{profileInfo.following}</Text>
+        </View>
       </SafeAreaView>
     );
   }
 }
 const styles = StyleSheet.create({
   textFirst: {
-  fontSize: 50,
-  fontWeight: 'bold',
-  textAlign: 'center',
-  marginTop: 300,
+    fontSize: 50,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

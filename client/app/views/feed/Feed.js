@@ -28,7 +28,6 @@ export default class Feed extends React.Component {
     })
     .then(res => res.json())
     .then(data => {
-      console.log(data);
       this.setState({feed: data, refreshing: false})
     })
     .catch((error) => {
@@ -37,7 +36,6 @@ export default class Feed extends React.Component {
   }
 
   renderItem(item) {
-    console.log(item);
     const post = item.item;
     const win = Dimensions.get('window');
     const ratio = win.width/post.width

@@ -28,7 +28,6 @@ export default class AllTime extends React.Component {
     })
     .then(res => res.json())
     .then(data => {
-      console.log(data);
       this.setState({leaderboard: data, refreshing: false})
     })
     .catch((error) => {

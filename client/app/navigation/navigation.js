@@ -58,35 +58,35 @@ export default class TabNavigator extends React.Component {
       }
     );
 
-    const LeaderboardNavigator = createStackNavigator(
+    const LeaderboardNavigator = createMaterialTopTabNavigator(
       {
-        Tabs: {
-          screen: createMaterialTopTabNavigator(
-            {
-              Daily: Daily,
-              Weekly: Weekly,
-              AllTime: AllTime
-            }
-          ),
-          navigationOptions: {
-            title: 'User Leaderboard Info'
-          }
-        }
+        Daily: Daily,
+        Weekly: Weekly,
+        AllTime: AllTime
       },
       {
-        navigationOptions:({ navigation }) => ({
-
-        })
+        lazy: true
       }
     )
 
     const ProfileNavigator = createStackNavigator(
       {
         Profile: {
-          screen: props => <Profile {...props} setUserId={this.setUserId} userId={this.state.userId} />
+          screen: props => <Profile {...props} userId={this.state.userId} />
         },
         Settings: {
-          screen: Settings
+          screen: props => <Settings {...props} setUserId={this.setUserId} userId={this.state.userId} />
+        }
+      },
+      {
+        cardStyle: {
+          backgroundColor: 'white'
+        },
+        navigationOptions: {
+          headerStyle: {
+            shadowColor: 'transparent',
+            borderBottomWidth: 0
+          }
         }
       }
     )

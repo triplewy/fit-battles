@@ -15,7 +15,6 @@ export default class Settings extends React.Component {
   }
 
   componentDidMount() {
-    //HAVE API CALL TO SERVER FETCHING PROFILE INFORMATION
   }
 
   logout(e) {
@@ -39,7 +38,6 @@ export default class Settings extends React.Component {
   render() {
     return (
       <View>
-        <Text style={styles.textFirst}> Profile </Text>
         <TouchableOpacity onPress={this.logout}>
           <Text>Logout</Text>
         </TouchableOpacity>

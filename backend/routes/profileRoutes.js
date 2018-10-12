@@ -2,6 +2,18 @@ module.exports = function(conn, loggedIn) {
     'use strict';
     var profileRoutes = require('express').Router();
 
+    profileRoutes.get('/info', loggedIn, (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/profile');
+      const userId = req.user
+      conn.query('SELECT * FROM users WHERE userId = :userId LIMIT 1', {userId: userId}, function(err, result) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send(result[0])
+        }
+      })
+    })
+
     profileRoutes.get('/:userId', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/profile/' + req.params.userId);
       var userId = null;

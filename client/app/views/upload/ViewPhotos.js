@@ -16,7 +16,6 @@ export default class ViewPhotos extends React.Component {
 
   renderItem(item) {
     const image = item.item.node.image;
-    console.log(image);
     const win = Dimensions.get('window');
     const ratio = (win.width/2)/image.width
     return (

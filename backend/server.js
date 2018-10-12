@@ -122,7 +122,7 @@ conn.query('DROP TABLE IF EXISTS votes')
 conn.query('DROP TABLE IF EXISTS following')
 conn.query('SET foreign_key_checks = 1')
 
-conn.query('CREATE TABLE IF NOT EXISTS users (userId INTEGER AUTO_INCREMENT PRIMARY KEY, profileName TEXT NOT NULL, location TEXT, followers INTEGER NOT NULL DEFAULT 0, following INTEGER NOT NULL DEFAULT 0, numPosts INTEGER NOT NULL DEFAULT 0, about TEXT, createdDate DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)')
+conn.query('CREATE TABLE IF NOT EXISTS users (userId INTEGER AUTO_INCREMENT PRIMARY KEY, profileName TEXT NOT NULL, location TEXT, followers INTEGER NOT NULL DEFAULT 0, following INTEGER NOT NULL DEFAULT 0, about TEXT, createdDate DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)')
 conn.query('CREATE TABLE IF NOT EXISTS logins (loginId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER NOT NULL, network TEXT, networkId TEXT, accessToken TEXT, email VARCHAR(255) UNIQUE, passwordHash CHAR(60), verificationHash CHAR(60), verified BOOLEAN NOT NULL DEFAULT FALSE, FOREIGN KEY (userId) REFERENCES users(userId));')
 conn.query('CREATE TABLE IF NOT EXISTS posts (mediaId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER NOT NULL, imageUrl VARCHAR(255) NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, profileName TEXT NOT NULL, wins INTEGER DEFAULT 0, matches INTEGER DEFAULT 0, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (userId) REFERENCES users(userId));')
 conn.query('CREATE TABLE IF NOT EXISTS votes (voteId INTEGER AUTO_INCREMENT PRIMARY KEY, userId INTEGER, winMediaId INTEGER NOT NULL, winUserId INTEGER NOT NULL, lossMediaId INTEGER, lossUserId INTEGER, dateTime DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY (winMediaId) REFERENCES posts(mediaId), FOREIGN KEY (lossMediaId) REFERENCES posts(mediaId), ' +
@@ -140,6 +140,14 @@ conn.query('CREATE TRIGGER after_votes_insert AFTER INSERT ON votes FOR EACH ROW
 'SELECT COUNT(*) INTO @lossPostMatches FROM votes WHERE winMediaId = NEW.lossMediaId OR lossMediaId = NEW.lossMediaId; ' +
 'UPDATE posts SET wins = @winPostWins, matches = @winPostMatches WHERE mediaId = NEW.winMediaId; ' +
 'UPDATE posts SET matches = @lossPostMatches WHERE mediaId = NEW.lossMediaId; END;')
+
+conn.query('CREATE TRIGGER after_following_insert AFTER INSERT ON following FOR EACH ROW BEGIN ' +
+'UPDATE users SET followers = (SELECT COUNT(*) FROM following WHERE followingUserId=NEW.followingUserId) WHERE userId=NEW.followingUserId; ' +
+'UPDATE users SET following = (SELECT COUNT(*) FROM following WHERE followerUserId=NEW.followerUserId) WHERE userId=NEW.followerUserId; END;')
+
+conn.query('CREATE TRIGGER after_following_delete AFTER DELETE ON following FOR EACH ROW BEGIN ' +
+'UPDATE users SET followers = (SELECT COUNT(*) FROM following WHERE followingUserId=OLD.followingUserId) WHERE userId=OLD.followingUserId; ' +
+'UPDATE users SET following = (SELECT COUNT(*) FROM following WHERE followerUserId=OLD.followerUserId) WHERE userId=OLD.followerUserId; ' + 'END;')
 
 var uploadRoutes = require('./routes/uploadRoutes')
 var authRoutes = require('./routes/authRoutes')
