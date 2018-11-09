@@ -10,13 +10,15 @@ module.exports = function(conn, loggedIn) {
       }
 
       if (userId) {
-        conn.query('SELECT a.*, b.location, ' +
+        conn.query('SELECT a.*, b.location, b.followers, ' +
         '((SELECT COUNT(*) FROM following WHERE followingUserId = a.userId AND followerUserId = :userId) > 0) AS following, ' +
         '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = a.userId) > 0) AS followsYou, ' +
-        '(a.userId = :userId) AS isPoster '  +
+        '(a.userId = :userId) AS isPoster, '  +
+        '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
         'FROM posts AS a ' +
         'JOIN users AS b ON b.userId = a.userId ' +
-        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY NOW() - a.dateTime ASC LIMIT 10', {userId: userId}, function(err, result) {
+        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() AND a.mediaId NOT IN (SELECT winMediaId FROM votes WHERE userId = :userId UNION ALL SELECT lossMediaId FROM votes WHERE userId = :userId) ' +
+        'ORDER BY NOW() - a.dateTime ASC LIMIT 20', {userId: userId}, function(err, result) {
           if (err) {
             console.log(err);
             res.send({message: 'error'})
@@ -34,7 +36,7 @@ module.exports = function(conn, loggedIn) {
         })
       } else {
         conn.query('SELECT a.*, b.location FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
-        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY NOW() - a.dateTime ASC LIMIT 10', [], function(err, result) {
+        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY NOW() - a.dateTime ASC LIMIT 20', [], function(err, result) {
           if (err) {
             console.log(err);
             res.send({message: 'error'})
@@ -60,8 +62,8 @@ module.exports = function(conn, loggedIn) {
         userId = req.user
       }
 
-      conn.query('INSERT IGNORE INTO votes (winMediaId, winUserId, lossMediaId, lossUserId) VALUES (:winMediaId, :winUserId, :lossMediaId, :lossUserId)',
-      {winMediaId: req.body.winMediaId, winUserId: req.body.winUserId, lossMediaId: req.body.lossMediaId, lossUserId: req.body.lossUserId},
+      conn.query('INSERT IGNORE INTO votes (userId, winMediaId, winUserId, lossMediaId, lossUserId) VALUES (:userId, :winMediaId, :winUserId, :lossMediaId, :lossUserId)',
+      {userId: userId, winMediaId: req.body.winMediaId, winUserId: req.body.winUserId, lossMediaId: req.body.lossMediaId, lossUserId: req.body.lossUserId},
       function(err, result) {
         if (err) {
           console.log(err);

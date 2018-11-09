@@ -2,8 +2,6 @@ import React from 'react';
 import {Dimensions, FlatList, View, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 import LeaderboardUser from './LeaderboardUser'
 
-const url = 'http://localhost:8081'
-
 export default class AllTime extends React.Component {
   constructor(props) {
     super(props);
@@ -23,7 +21,7 @@ export default class AllTime extends React.Component {
 
   fetchAllTimeLeaderboard() {
     this.setState({refreshing: true})
-    fetch(url + '/api/leaderboard/allTime', {
+    fetch(global.API_URL + '/api/leaderboard/allTime', {
       credentials: 'include'
     })
     .then(res => res.json())

@@ -156,6 +156,7 @@ var battleRoutes = require('./routes/battleRoutes')
 var leaderboardRoutes = require('./routes/leaderboardRoutes')
 var feedRoutes = require('./routes/feedRoutes')
 var cardRoutes = require('./routes/cardRoutes')
+var winnerRoutes = require('./routes/winnerRoutes')
 var testData = require('./routes/testData')
 
 app.get('/api/sessionLogin', loggedIn, (req, res) => {
@@ -179,8 +180,10 @@ app.use('/api/feed', feedRoutes(conn, loggedIn))
 
 app.use('/api/card', cardRoutes(conn, loggedIn))
 
-server.listen(8081, function(){
-    console.log('- Server listening on port 8081');
+app.use('/api/winner', winnerRoutes(conn, loggedIn))
+
+server.listen(8082, function(){
+    console.log('- Server listening on port 8082');
 });
 
 function loggedIn(req, res, next) {

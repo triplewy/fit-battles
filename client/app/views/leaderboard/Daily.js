@@ -1,7 +1,5 @@
 import React from 'react';
-import {Dimensions, Image, View, ScrollView, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
-
-const url = 'http://localhost:8081'
+import {Dimensions, ImageBackground, Image, View, ScrollView, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 
 export default class Daily extends React.Component {
   constructor(props) {
@@ -22,7 +20,7 @@ export default class Daily extends React.Component {
 
   fetchDailyLeaderboard() {
     this.setState({refreshing: true})
-    fetch(url + '/api/leaderboard/daily', {
+    fetch(global.API_URL + '/api/leaderboard/daily', {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -39,11 +37,21 @@ export default class Daily extends React.Component {
     const win = Dimensions.get('window');
     const ratio = (win.width/2)/post.width
     return (
-      <TouchableHighlight onPress={() => this.props.navigation.navigate('UserProfile', {userId: post.userId})}>
-        <Image
+      <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: post.userId})}>
+        <ImageBackground
+          resizeMode={'contain'}
           source={{ uri: post.imageUrl }}
-          style={{width: win.width/2, height: post.height * ratio}} />
-      </TouchableHighlight>
+          style={{width: win.width/2, height: win.width / 2.0 * 4.0 / 3}}
+        >
+          <View style={{position: 'absolute', right: 10, top: 10, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.6)'}}>
+            <Text style={{color: 'white', padding: 5}}>{post.dailyRank + 1}</Text>
+          </View>
+          <View style={{position: 'absolute', left: 10, bottom: 10, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.6)', flexDirection: 'row'}}>
+            <Text style={{color: 'white', paddingVertical: 5, paddingLeft: 3}}>{post.matches ? Math.round(post.wins * 1.0 / post.matches * 100) : 0}</Text>
+            <Text style={{color: 'white', paddingVertical: 5, paddingHorizontal: 3}}>%</Text>
+          </View>
+        </ImageBackground>
+      </TouchableOpacity>
     )
   }
 

@@ -38,7 +38,10 @@ module.exports = function(conn, loggedIn) {
     profileRoutes.get('/feed', loggedIn, (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/profile/feed');
       const userId = req.user
-      conn.query('SELECT * FROM posts WHERE userId = :userId ORDER BY dateTime DESC', {userId: userId}, function(err, result) {
+      conn.query('SELECT a.*, ' +
+      '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
+      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = a.mediaId LIMIT 1)) AS dailyRank ' +
+      'FROM posts AS a WHERE a.userId = :userId ORDER BY a.dateTime DESC', {userId: userId}, function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -55,9 +58,44 @@ module.exports = function(conn, loggedIn) {
       }
       const profileId = req.params.userId
 
-      conn.query('SELECT *, ' +
-      '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = posts.mediaId OR lossMediaId = posts.mediaId)) > 0) AS voted ' +
-      'FROM posts WHERE userId = :profileId ORDER BY dateTime DESC', {userId: userId, profileId: profileId}, function(err, result) {
+      conn.query('SELECT a.*, ' +
+      '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
+      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = a.mediaId LIMIT 1)) AS dailyRank ' +
+      'FROM posts AS a WHERE a.userId = :profileId ORDER BY a.dateTime DESC', {userId: userId, profileId: profileId}, function(err, result) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send(result)
+        }
+      })
+    })
+
+    profileRoutes.get('/votes', loggedIn, (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/profile/votes');
+      const userId = req.user
+      conn.query('SELECT b.*, true AS voted, ' +
+      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = b.mediaId LIMIT 1)) AS dailyRank ' +
+      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :userId ORDER BY dateTime DESC', {userId: userId}, function(err, result) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send(result)
+        }
+      })
+    })
+
+    profileRoutes.get('/:userId/votes', (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/profile/' + req.params.userId + '/votes');
+      var userId = null;
+      if (req.user) {
+        userId = req.user
+      }
+      const profileId = req.params.userId
+
+      conn.query('SELECT b.*, ' +
+      '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.winMediaId OR lossMediaId = a.winMediaId)) > 0) AS voted, ' +
+      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = b.mediaId LIMIT 1)) AS dailyRank ' +
+      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :profileId ORDER BY dateTime DESC', {userId: userId, profileId: profileId}, function(err, result) {
         if (err) {
           console.log(err);
         } else {

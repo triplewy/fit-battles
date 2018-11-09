@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimensions, Image, View, FlatList, StyleSheet, Text, TouchableHighlight} from 'react-native';
+import {Dimensions, Image, View, FlatList, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import SelectedPhoto from './SelectedPhoto';
 
 export default class ViewPhotos extends React.Component {
@@ -7,51 +7,35 @@ export default class ViewPhotos extends React.Component {
     super(props);
 
     this.state = {
-      selectedPhoto: null
     };
 
     this.renderItem = this.renderItem.bind(this)
-    this.setSelectedPhoto = this.setSelectedPhoto.bind(this)
   }
 
   renderItem(item) {
     const image = item.item.node.image;
     const win = Dimensions.get('window');
-    const ratio = (win.width/2)/image.width
+    const ratio = (win.width / 2.0) * (4.0 / 3)
     return (
-      <TouchableHighlight onPress={this.setSelectedPhoto.bind(this, image)}>
+      <TouchableOpacity onPress={() => this.props.navigation.navigate('SelectedPhoto', {selectedPhoto: {uri: image.uri, width: image.width, height: image.height}})}>
         <Image
+          resizeMode={'contain'}
           source={{ uri: image.uri }}
-          style={{width: win.width/2, height: image.height * ratio}} />
-      </TouchableHighlight>
+          style={{width: win.width / 2.0, height: (win.width / 2.0) * (4.0 / 3)}} />
+      </TouchableOpacity>
     )
   }
 
-  setSelectedPhoto(image) {
-    this.setState({selectedPhoto: {uri: image.uri, width: image.width, height: image.height}})
-  }
-
   render() {
-    if (this.state.selectedPhoto) {
-      return (
-        <SelectedPhoto selectedPhoto={this.state.selectedPhoto} navigation={this.props.navigation}/>
-      )
-    } else {
-      return (
-        <FlatList
-          data={this.props.photos}
-          numColumns={2}
-          renderItem={this.renderItem}
-          keyExtractor={(item, index) => index}
-        />
-      )
-    }
+    return (
+      <FlatList
+        data={this.props.photos}
+        numColumns={2}
+        renderItem={this.renderItem}
+        keyExtractor={(item, index) => index}
+        onEndReached={this.props.getGalleryScroll.bind(this)}
+        onEndReachedThreshold={0.5}
+      />
+    )
   }
 }
-
-const styles = StyleSheet.create({
-  list: {
-    flexDirection: 'row',
-    flexWrap: 'wrap'
-  }
-})

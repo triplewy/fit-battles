@@ -2,8 +2,6 @@ import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 
-const url = 'http://localhost:8081'
-
 export default class Edit extends React.Component {
   constructor(props) {
     super(props);
@@ -27,7 +25,7 @@ export default class Edit extends React.Component {
   checkProfileName(e) {
     const profileName = e.target.value
     this.setState({profileName: profileName})
-    fetch(url + '/api/profile/checkProfileName/' + profileName, {
+    fetch(global.API_URL + '/api/profile/checkProfileName/' + profileName, {
       credentials: 'include',
     })
     .then(res => res.json())
@@ -44,7 +42,7 @@ export default class Edit extends React.Component {
   }
 
   save() {
-    fetch(url + '/api/profile/edit', {
+    fetch(global.API_URL + '/api/profile/edit', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -73,30 +71,60 @@ export default class Edit extends React.Component {
 
   render() {
     return (
-      <SafeAreaView>
-        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+      <SafeAreaView style={{flex: 1}}>
+        <TouchableOpacity style={{paddingHorizontal: 30, paddingVertical: 10}} onPress={() => this.props.navigation.goBack()}>
           <Text>Back</Text>
         </TouchableOpacity>
-        <View>
-          <FormLabel>Profile Name</FormLabel>
-          <TextInput autoCapitalize='none' value={this.state.profileName} onChangeText={(text) => this.setState({profileName: text})}/>
-          <FormLabel>Location</FormLabel>
-          <TextInput autoCapitalize='none' value={this.state.location} onChangeText={(text) => this.setState({location: text})}/>
-          <FormLabel>About</FormLabel>
-          <TextInput autoCapitalize='none' value={this.state.about} onChangeText={(text) => this.setState({about: text})}/>
-          <TouchableOpacity onPress={this.save.bind(this)}>
-            <Text>Save</Text>
+        <View style={styles.titleView}>
+          <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10}}>Edit Profile</Text>
+        </View>
+        <View style={styles.inputView}>
+          <Text style={styles.inputLabel}>Profile name</Text>
+          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.profileName} onChangeText={(text) => this.setState({profileName: text})}/>
+          <Text style={styles.inputLabel}>Location</Text>
+          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.location} onChangeText={(text) => this.setState({location: text})}/>
+          {/* <Text style={styles.inputLabel}>About</Text>
+          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.about} onChangeText={(text) => this.setState({about: text})}/> */}
+          <TouchableOpacity style={styles.loginButton} onPress={this.save.bind(this)}>
+            <Text style={styles.loginButtonText}>Save</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 }
+
 const styles = StyleSheet.create({
-  textFirst: {
-  fontSize: 50,
-  fontWeight: 'bold',
-  textAlign: 'center',
-  marginTop: 300,
+  titleView: {
+    paddingHorizontal: 30,
+    marginVertical: 30
   },
-});
+  inputView: {
+    flex: 1,
+    padding: 30
+  },
+  inputLabel: {
+    marginVertical: 15,
+    fontSize: 14,
+    fontWeight: 'bold'
+  },
+  textInput: {
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 12,
+    fontSize: 14,
+    borderRadius: 4,
+  },
+  loginButton: {
+    marginTop: 30,
+    alignItems: 'center',
+    backgroundColor: 'blue',
+    borderRadius: 4
+  },
+  loginButtonText: {
+    padding: 15,
+    fontSize: 18,
+    color: 'white'
+  }
+})

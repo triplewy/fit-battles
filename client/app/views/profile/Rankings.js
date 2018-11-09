@@ -1,8 +1,6 @@
 import React from 'react';
 import {SafeAreaView, View, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 
-const url = 'http://localhost:8081'
-
 export default class Rankings extends React.Component {
   constructor(props) {
     super(props);
@@ -18,6 +16,12 @@ export default class Rankings extends React.Component {
     this.fetchLeaderboardHeader()
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.refreshing && this.props.refreshing !== prevProps.refreshing) {
+      this.fetchLeaderboardHeader()
+    }
+  }
+
   fetchLeaderboardHeader() {
     const params = this.props.navigationParams
     var userProfile = ''
@@ -25,7 +29,7 @@ export default class Rankings extends React.Component {
       userProfile = '/' + params.userId
     }
 
-    fetch(url + '/api/leaderboard' + userProfile + '/header', {
+    fetch(global.API_URL + '/api/leaderboard' + userProfile + '/header', {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -41,23 +45,30 @@ export default class Rankings extends React.Component {
     if (this.state.ranks) {
       const ranks = this.state.ranks
       return (
-        <SafeAreaView>
-          <View>
-            <Text>Daily Rank</Text>
-            <Text>{ranks.dailyRank}</Text>
-            <Text>Weekly Rank</Text>
-            <Text>{ranks.weeklyRank}</Text>
-            <Text>All Time Rank</Text>
-            <Text>{ranks.allTimeRank}</Text>
-          </View>
-        </SafeAreaView>
+        <View style={{flex: 1, flexDirection: 'row', marginTop: 10}}>
+          <Text style={styles.rankLabel}>Daily: #</Text>
+          <Text style={styles.rankNumber}>{ranks.dailyRank + 1}</Text>
+          <Text style={styles.rankLabel}>Weekly: #</Text>
+          <Text style={styles.rankNumber}>{ranks.weeklyRank + 1}</Text>
+          <Text style={styles.rankLabel}>All Time: #</Text>
+          <Text style={styles.rankNumber}>{ranks.allTimeRank + 1}</Text>
+        </View>
       )
     } else {
       return (
-        <SafeAreaView>
+        <View>
           <Text>Loading</Text>
-        </SafeAreaView>
+        </View>
       )
     }
   }
 }
+
+const styles = StyleSheet.create({
+  rankLabel: {
+    marginLeft: 20
+  },
+  rankNumber: {
+    fontWeight: 'bold'
+  }
+});

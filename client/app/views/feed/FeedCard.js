@@ -1,8 +1,7 @@
 import React from 'react';
-import { Dimensions, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Dimensions, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, Alert } from 'react-native';
 import DoubleTap from '../DoubleTap'
-
-const url = 'http://localhost:8081'
+import { formatDate } from '../Date'
 
 export default class FeedCard extends React.Component {
   constructor(props) {
@@ -16,6 +15,9 @@ export default class FeedCard extends React.Component {
 
     this.cardVote = this.cardVote.bind(this)
     this.cardUnvote = this.cardUnvote.bind(this)
+    this.showAlert = this.showAlert.bind(this)
+    this.showDeleteAlert = this.showDeleteAlert.bind(this)
+    this.deleteCard = this.deleteCard.bind(this)
   }
 
   componentDidUpdate(prevProps) {
@@ -26,7 +28,7 @@ export default class FeedCard extends React.Component {
   }
 
   cardVote() {
-    fetch(url + '/api/card/vote', {
+    fetch(global.API_URL + '/api/card/vote', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -52,7 +54,7 @@ export default class FeedCard extends React.Component {
   }
 
   cardUnvote() {
-    fetch(url + '/api/card/unvote', {
+    fetch(global.API_URL + '/api/card/unvote', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -76,25 +78,93 @@ export default class FeedCard extends React.Component {
     });
   }
 
+  showAlert() {
+    Alert.alert(
+      'Options',
+      '',
+      [
+        {text: 'Share', onPress: () => console.log('Share')},
+        {text: 'Delete', onPress: this.showDeleteAlert, style: 'destructive'},
+        {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+      ]
+    )
+  }
+
+  showDeleteAlert() {
+    Alert.alert(
+      'Delete post',
+      'Are you sure?',
+      [
+        {text: 'Delete', onPress: this.deleteCard, style: 'destructive'},
+        {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+      ]
+    )
+  }
+
+  deleteCard() {
+    fetch(global.API_URL + '/api/card/delete', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        mediaId: this.props.mediaId
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.message === "success") {
+        console.log("success");
+      } else {
+        console.log("failure")
+      }
+    })
+    .catch(function(err) {
+        console.log(err);
+    });
+  }
+
 
   render() {
     const win = Dimensions.get('window');
-    const ratio = (win.width - 20)/this.props.width
     return (
-      <View style={{backgroundColor: 'white', borderRadius: 8, alignItems: 'center'}}>
+      <View style={{backgroundColor: 'white', borderRadius: 8, marginBottom: 40, marginTop: 10, padding: 10}}>
         <DoubleTap onDoubleTap={this.state.voted ? this.cardUnvote : this.cardVote}>
-          <Image
+          <ImageBackground
             source={{uri: this.props.imageUrl}}
-            style={{width: win.width - 20, height: ratio * this.props.height, borderRadius: 8}}
-          />
+            resizeMode={'contain'}
+            style={{width: win.width - 20, height: (win.width - 20) * (4.0 / 3), borderRadius: 8}}
+            imageStyle={{borderRadius: 8, borderWidth: 1, borderColor: '#ccc'}}
+          >
+            <Text style={{position: 'absolute', right: 10, bottom: 10}}>{this.state.voted ? 'Voted' : null}</Text>
+          </ImageBackground>
         </DoubleTap>
-        <View>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
-            <Text style={{marginTop: 10, marginBottom: 10, marginLeft: 10, fontWeight: '300', fontSize: 18}}>{this.props.profileName}</Text>
-          </TouchableOpacity>
-          <Text>{this.state.wins + 'wins'}</Text>
-          <Text>{this.state.matches + 'matches'}</Text>
-          <Text>{this.state.voted ? 'Voted' : 'Vote'}</Text>
+        <View style={{flex: 0, flexDirection: 'column', padding: 10}}>
+          <View style={{flex: 0, flexDirection: 'row'}}>
+            <View style={{flex: 1, flexDirection: 'column'}}>
+              <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
+                <Text style={{fontWeight: '600', fontSize: 18, marginBottom: 5}}>{this.props.profileName}</Text>
+              </TouchableOpacity>
+              <Text>{formatDate(this.props.dateTime)}</Text>
+            </View>
+            <View>
+              <View style={{flex: 1, flexDirection: 'row'}}>
+                <Text style={{fontWeight: '600', fontSize: 18}}>Rank: #</Text>
+                <Text style={{fontWeight: '600', fontSize: 18}}>{this.props.dailyRank + 1}</Text>
+              </View>
+              <Text style={{textAlign: 'right'}}>{this.state.matches ? Math.round(this.state.wins * 1.0 / this.state.matches * 100) + '%' : 0 + '%'}</Text>
+            </View>
+          </View>
+          {this.props.isPoster ?
+            <TouchableOpacity onPress={this.showAlert}>
+              <Text>More</Text>
+            </TouchableOpacity>
+            :
+            null
+          }
+
         </View>
       </View>
     )

@@ -39,6 +39,24 @@ module.exports = function(conn, loggedIn) {
       })
     })
 
+    cardRoutes.post('/delete', loggedIn, (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/card/delete');
+      const userId = req.user
+      conn.query('DELETE FROM posts WHERE userId = :userId AND mediaId = :mediaId', {userId: userId, mediaId: req.body.mediaId}, function(err, result) {
+        if (err) {
+          console.log(err);
+        } else {
+          if (result.affectedRows) {
+            console.log("deleted successfully");
+            res.send({message: 'success'})
+          } else {
+            console.log("deleted failed");
+            res.send({message: 'fail'})
+          }
+        }
+      })
+    })
+
     return cardRoutes;
 
 };

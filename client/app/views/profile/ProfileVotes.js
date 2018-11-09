@@ -1,8 +1,8 @@
 import React from 'react';
-import {Dimensions, Image, View, SafeAreaView, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
+import {FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 import FeedCard from '../feed/FeedCard'
 
-export default class ProfileFeed extends React.Component {
+export default class ProfileVotes extends React.Component {
   constructor(props) {
     super(props);
 
@@ -33,7 +33,7 @@ export default class ProfileFeed extends React.Component {
     }
 
     this.setState({refreshing: true})
-    fetch(global.API_URL + '/api/profile' + userProfile + '/feed', {
+    fetch(global.API_URL + '/api/profile' + userProfile + '/votes', {
       credentials: 'include'
     })
     .then(res => res.json())

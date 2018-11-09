@@ -1,29 +1,30 @@
 import React from 'react';
-import {Dimensions, Image, View, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
-
-const url = 'http://localhost:8081'
+import {Dimensions, Image, ScrollView, View, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 
 export default class SelectedPhoto extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      uploadClicked: false,
-      uploaded: false,
+      image: this.props.navigation.state.params.selectedPhoto,
       progress: 0
     };
 
+    this.crop = this.crop.bind(this)
     this.upload = this.upload.bind(this)
     this.uploadHelper = this.uploadHelper.bind(this)
   }
 
+  crop() {
+
+  }
+
   upload() {
-    const selectedPhoto = this.props.selectedPhoto
+    const selectedPhoto = this.props.navigation.state.params.selectedPhoto
     var formData = new FormData();
-    formData.append('image', {uri: this.props.selectedPhoto.uri, name: "file"})
+    formData.append('image', {uri: selectedPhoto.uri, name: "file"})
     formData.append('width', selectedPhoto.width);
     formData.append('height', selectedPhoto.height);
-    this.setState({uploadClicked: true})
     this.uploadHelper(formData)
   }
 
@@ -34,40 +35,41 @@ export default class SelectedPhoto extends React.Component {
     xhr.onreadystatechange = () => {
      if(xhr.readyState === 4 && xhr.status === 200){
          console.log(xhr.responseText);
-         this.setState({uploaded: true})
-         const navigation = this.props.navigation
-         navigation.navigate('Profile')
+         this.props.navigation.navigate('Profile')
       }
     }
 
     xhr.upload.onprogress = (e) => {
       console.log("loaded", e.loaded);
       console.log("total", e.total);
-      this.setState({progress: e.loaded/e.total * 100})
+      this.setState({progress: e.loaded * 1.0 / e.total * 100})
     }
 
-    xhr.open('POST', url + '/api/upload');
+    xhr.open('POST', global.API_URL + '/api/upload');
     xhr.send(formData)
   }
 
   render() {
-    const selectedPhoto = this.props.selectedPhoto
+    const selectedPhoto = this.props.navigation.state.params.selectedPhoto
     const win = Dimensions.get('window');
     const ratio = win.width/selectedPhoto.width
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const currDate = new Date().toLocaleDateString('en-US', options)
 
     return (
-      <View>
+      <ScrollView contentContainerStyle={{alignItems: 'center'}}>
+        <Text style={{marginVertical: 30}}>{currDate}</Text>
         <Image
           resizeMode={'contain'}
           source={{uri: selectedPhoto.uri}}
-          style={{width: win.width, height: selectedPhoto.height * ratio}}/>
+          style={{width: win.width - 20, height: (win.width - 20) * 4.0 / 3, borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 8, marginBottom: 30}}/>
         <TouchableOpacity onPress={this.upload}>
-          <Text>Upload</Text>
+          <Text style={{color: '#548EC6'}}>Upload</Text>
         </TouchableOpacity>
         <View style={{width: this.state.progress + '%', height: 20, backgroundColor: 'green'}}>
 
         </View>
-      </View>
+      </ScrollView>
     )
 
   }

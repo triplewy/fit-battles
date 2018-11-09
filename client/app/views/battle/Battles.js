@@ -1,9 +1,9 @@
 import React from 'react';
-import { Dimensions, SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, TouchableHighlight } from 'react-native';
+import { Dimensions, SafeAreaView, ScrollView, RefreshControl, View, Text, StyleSheet, Image, TouchableOpacity, TouchableHighlight } from 'react-native';
 import Card from './Card'
+import FeedCard from '../feed/FeedCard'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
-
-const url = 'http://localhost:8081'
+import BattlesModal from './BattlesModal'
 
 export default class Battles extends React.Component {
   constructor(props) {
@@ -13,7 +13,8 @@ export default class Battles extends React.Component {
       battleData: [],
       currentBattle: 0,
       activeSlide: 0,
-      endOfBattles: false
+      endOfBattles: false,
+      refreshing: false
     };
 
     this.fetchBattles = this.fetchBattles.bind(this)
@@ -27,17 +28,11 @@ export default class Battles extends React.Component {
 
   renderItem ({item, index}) {
     return (
-      <Card {...item} handleVote={this.handleVote}/>
+      <Card {...item} index={index} handleVote={this.handleVote} navigation={this.props.navigation}/>
     )
   }
 
   handleVote (index) {
-    if (this.state.currentBattle === this.state.battleData.length - 1) {
-      this.setState({endOfBattles: true})
-    } else {
-      this.setState({currentBattle: this.state.currentBattle + 1, activeSlide: 0})
-    }
-    this.carousel.snapToItem(0)
     const currentBattle = this.state.battleData[this.state.currentBattle]
 
     var winMediaId = 0
@@ -57,7 +52,7 @@ export default class Battles extends React.Component {
       lossUserId = currentBattle[0].userId
     }
 
-    fetch(url + '/api/battles/vote', {
+    fetch(global.API_URL + '/api/battles/vote', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -73,11 +68,12 @@ export default class Battles extends React.Component {
     })
     .then(res => res.json())
     .then(data => {
-      if (data.message === "success") {
-        console.log("success");
+      if (this.state.currentBattle === this.state.battleData.length - 1) {
+        this.fetchBattles()
       } else {
-        console.log("failure")
+        this.setState({currentBattle: this.state.currentBattle + 1, activeSlide: 0})
       }
+      this.carousel.snapToItem(0)
     })
     .catch(function(err) {
         console.log(err);
@@ -85,13 +81,18 @@ export default class Battles extends React.Component {
   }
 
   fetchBattles() {
-    fetch(url + '/api/battles', {
+    this.setState({refreshing: true})
+    fetch(global.API_URL + '/api/battles', {
       credentials: 'include'
     })
     .then(res => res.json())
     .then(data => {
       console.log(data);
-      this.setState({battleData: data})
+      if (data.length > 0) {
+        this.setState({battleData: data, currentBattle: 0, refreshing: false})
+      } else {
+        this.setState({endOfBattles: true, refreshing: false})
+      }
     })
     .catch((error) => {
       console.error(error);
@@ -104,7 +105,7 @@ export default class Battles extends React.Component {
        <Pagination
          dotsLength={battleData[currentBattle].length}
          activeDotIndex={activeSlide}
-         containerStyle={{ backgroundColor: 'transparent' }}
+         containerStyle={{ backgroundColor: 'transparent', paddingVertical: 0}}
          dotStyle={{
              width: 8,
              height: 8,
@@ -127,15 +128,34 @@ export default class Battles extends React.Component {
 
     if (this.state.endOfBattles) {
       return (
-        <SafeAreaView>
-          <Text>End of battles</Text>
-        </SafeAreaView>
+        <ScrollView
+          style={{paddingTop: 30, marginBottom: 30}}
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this.fetchBattles.bind(this)}
+            />
+          }
+          >
+          <Text style={{textAlign: 'center', marginTop: 300}}>You have no more battles left</Text>
+        </ScrollView>
       )
     } else {
       if (this.state.battleData.length > 0) {
         return (
-          <SafeAreaView>
-            <Text>Battle</Text>
+          <ScrollView
+            style={{paddingTop: 30, paddingBottom: 30}}
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this.fetchBattles.bind(this)}
+              />
+            }
+          >
+            <BattlesModal {...this.props} />
+            <View style={{borderBottomWidth: 1, borderColor: '#ccc', marginHorizontal: 40}}>
+              <Text style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', paddingVertical: 10}}>Battle</Text>
+            </View>
             <Carousel
               ref={(c) => { this.carousel = c }}
               data={this.state.battleData[this.state.currentBattle]}
@@ -146,12 +166,13 @@ export default class Battles extends React.Component {
               layout={'default'}
             />
             {this.pagination}
-          </SafeAreaView>
+          </ScrollView>
         )
       } else {
         return (
           <SafeAreaView>
-            <Text>Loading</Text>
+            <BattlesModal {...this.props} />
+            <Text style={{textAlign: 'center', marginTop: 300}}>Loading</Text>
           </SafeAreaView>
         )
       }

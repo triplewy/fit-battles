@@ -1,8 +1,6 @@
 import React from 'react';
-import { SafeAreaView, Text, TextInput, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
-
-const url = "http://localhost:8081"
 
 export default class Signup extends React.Component {
   constructor(props) {
@@ -18,7 +16,7 @@ export default class Signup extends React.Component {
   }
 
   signup(e) {
-    fetch(url + '/api/auth/signup', {
+    fetch(global.API_URL + '/api/auth/signup', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -46,30 +44,60 @@ export default class Signup extends React.Component {
 
   render() {
     return (
-      <SafeAreaView>
-        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+      <SafeAreaView style={{flex: 1}}>
+        <TouchableOpacity style={{paddingHorizontal: 30}} onPress={() => this.props.navigation.goBack()}>
           <Text>Back</Text>
         </TouchableOpacity>
-        <Text style={styles.textFirst}> SIGNUP </Text>
-        <FormLabel>Email</FormLabel>
-        <TextInput autoCapitalize='none' onChangeText={(text) => this.setState({email: text})}/>
-        <FormLabel>Password</FormLabel>
-        <TextInput secureTextEntry autoCapitalize='none' onChangeText={(text) => this.setState({password: text})}/>
-        <FormLabel>Confirm Password</FormLabel>
-        <TextInput secureTextEntry autoCapitalize='none' onChangeText={(text) => this.setState({confirmPassword: text})}/>
-        <TouchableOpacity onPress={this.signup}>
-          <Text>Signup</Text>
-        </TouchableOpacity>
+        <View style={styles.titleView}>
+          <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10}}>Sign up</Text>
+        </View>
+        <View style={styles.inputView}>
+          <Text style={styles.inputLabel}>Your Email</Text>
+          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
+          <Text style={styles.inputLabel}>Password</Text>
+          <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({password: text})}/>
+          <Text style={styles.inputLabel}>Confirm Password</Text>
+          <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({confirmPassword: text})}/>
+          <TouchableOpacity style={styles.loginButton} onPress={this.signup}>
+            <Text style={styles.loginButtonText}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  textFirst: {
-  fontSize: 50,
-  fontWeight: 'bold',
-  textAlign: 'center',
-  marginTop: 300,
+  titleView: {
+    paddingHorizontal: 30,
+    marginVertical: 30
   },
-});
+  inputView: {
+    flex: 1,
+    padding: 30
+  },
+  inputLabel: {
+    marginVertical: 15,
+    fontSize: 14,
+    fontWeight: 'bold'
+  },
+  textInput: {
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 12,
+    fontSize: 14,
+    borderRadius: 4,
+  },
+  loginButton: {
+    alignItems: 'center',
+    backgroundColor: 'blue',
+    borderRadius: 4,
+    marginVertical: 30
+  },
+  loginButtonText: {
+    padding: 15,
+    fontSize: 18,
+    color: 'white'
+  }
+})

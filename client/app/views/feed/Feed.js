@@ -1,8 +1,6 @@
 import React from 'react';
-import {Dimensions, Image, View, SafeAreaView, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
+import {ScrollView, View, SafeAreaView, RefreshControl, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 import FeedCard from './FeedCard'
-
-const url = 'http://localhost:8081'
 
 export default class Feed extends React.Component {
   constructor(props) {
@@ -23,7 +21,7 @@ export default class Feed extends React.Component {
 
   fetchFeed() {
     this.setState({refreshing: true})
-    fetch(url + '/api/feed', {
+    fetch(global.API_URL + '/api/feed', {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -37,37 +35,41 @@ export default class Feed extends React.Component {
 
   renderItem(item) {
     const post = item.item;
-    const win = Dimensions.get('window');
-    const ratio = win.width/post.width
     return (
       <FeedCard {...post} navigation={this.props.navigation} />
     )
   }
 
   render() {
-    if (this.props.userId) {
+    if (this.state.feed.length > 0) {
       return (
-        <SafeAreaView>
-          <Text>Feed</Text>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this.fetchFeed.bind(this)}
+            />
+          }
+        >
+          <View style={{marginTop: 40, borderBottomWidth: 1, borderColor: '#ccc', marginHorizontal: 40}}>
+            <Text style={{textAlign: 'center', fontSize: 32, fontWeight: 'bold', padding: 10}}>Feed</Text>
+          </View>
           <FlatList
             data={this.state.feed}
             renderItem={this.renderItem}
             keyExtractor={(item, index) => index.toString()}
-            refreshing={this.state.refreshing}
-            onRefresh={this.fetchFeed.bind(this)}
           />
-        </SafeAreaView>
+        </ScrollView>
       )
     } else {
       return (
-        <SafeAreaView>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('Auth')}>
-            <Text>Login to follow users you like!</Text>
+        <SafeAreaView style={{alignItems: 'center'}}>
+          <TouchableOpacity style={{marginTop: 300}} onPress={() => this.props.navigation.navigate('Auth')}>
+            <Text>Login or signup!</Text>
           </TouchableOpacity>
         </SafeAreaView>
       )
     }
-
   }
 }
 

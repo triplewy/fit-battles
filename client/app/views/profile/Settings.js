@@ -1,8 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-const url = 'http://localhost:8081'
-
 export default class Settings extends React.Component {
   constructor(props) {
     super(props);
@@ -18,7 +16,7 @@ export default class Settings extends React.Component {
   }
 
   logout(e) {
-    fetch(url + '/api/auth/logout', {
+    fetch(global.API_URL + '/api/auth/logout', {
       method: 'POST',
       credentials: 'include'
     })
@@ -37,10 +35,11 @@ export default class Settings extends React.Component {
 
   render() {
     return (
-      <SafeAreaView>
+      <SafeAreaView style={{margin: 20}}>
         <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
           <Text>Back</Text>
         </TouchableOpacity>
+        <Text style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginVertical: 30}}>Settings</Text>
         <TouchableOpacity onPress={this.logout}>
           <Text>Logout</Text>
         </TouchableOpacity>

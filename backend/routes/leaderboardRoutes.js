@@ -70,7 +70,9 @@ module.exports = function(conn, loggedIn) {
 
     leaderboardRoutes.get('/daily', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/leaderboard/daily');
-      conn.query('SELECT * FROM posts WHERE dateTime >= CURRENT_DATE() AND dateTime <= NOW() ORDER BY wins * 1.0/matches DESC LIMIT 20', [], function(err, result) {
+      conn.query('SELECT a.*, ' +
+      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
+      'FROM posts AS a WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY a.wins * 1.0 / a.matches DESC LIMIT 20', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -81,7 +83,8 @@ module.exports = function(conn, loggedIn) {
 
     leaderboardRoutes.get('/weekly', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/leaderboard/weekly');
-      conn.query('SELECT *, (SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) AS wins ' +
+      conn.query('SELECT *, ' +
+      '(SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) AS wins ' +
       'FROM users ORDER BY wins DESC LIMIT 20', [], function(err, result) {
         if (err) {
           console.log(err);

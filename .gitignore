@@ -1,1 +1,6 @@
 dump.rdb
+/client/node_modules
+/client/third-party
+/client/ios
+/client/android
+/backend/node_modules

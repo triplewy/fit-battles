@@ -2,8 +2,6 @@ import React from 'react';
 import {Dimensions, FlatList, View, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 import LeaderboardUser from './LeaderboardUser'
 
-const url = 'http://localhost:8081'
-
 export default class Weekly extends React.Component {
   constructor(props) {
     super(props);
@@ -23,11 +21,12 @@ export default class Weekly extends React.Component {
 
   fetchWeeklyLeaderboard() {
     this.setState({refreshing: true})
-    fetch(url + '/api/leaderboard/weekly', {
+    fetch(global.API_URL + '/api/leaderboard/weekly', {
       credentials: 'include'
     })
     .then(res => res.json())
     .then(data => {
+      console.log(data);
       this.setState({leaderboard: data, refreshing: false})
     })
     .catch((error) => {

@@ -1,4 +1,4 @@
-const url = 'http://localhost:8081'
+const url = global.API_URL
 
 export function follow(userId) {
   return new Promise(function(resolve, reject) {

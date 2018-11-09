@@ -2,9 +2,8 @@ import React from 'react';
 import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, RefreshControl } from 'react-native';
 import Rankings from './Rankings'
 import ProfileFeed from './ProfileFeed'
+import ProfileVotes from './ProfileVotes'
 import {follow, unfollow} from '../Follow'
-
-const url = 'http://localhost:8081'
 
 export default class Profile extends React.Component {
   constructor(props) {
@@ -14,10 +13,12 @@ export default class Profile extends React.Component {
       profileInfo: {},
       following: false,
       refreshing: false,
-      loggedIn: true
+      loggedIn: true,
+      feedToggle: 0
     };
 
     this.fetchProfileInfo = this.fetchProfileInfo.bind(this)
+    this.refreshProfile = this.refreshProfile.bind(this)
     this.profileFollow = this.profileFollow.bind(this)
     this.profileUnfollow = this.profileUnfollow.bind(this)
   }
@@ -38,17 +39,47 @@ export default class Profile extends React.Component {
     if (navigationParams) {
       userProfile = '/' + navigationParams.userId
     }
-    this.setState({refreshing: true})
-    fetch(url + '/api/profile' + userProfile + '/info', {
+    fetch(global.API_URL + '/api/profile' + userProfile + '/info', {
       credentials: 'include'
     })
     .then(res => res.json())
     .then(data => {
       if (data.message === 'not logged in') {
-        this.setState({loggedIn: false})
+        this.setState({loggedIn: false, refreshing: false})
       } else {
         this.setState({profileInfo: data, following: data.following, refreshing: false})
       }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }
+
+  refreshProfile() {
+    const navigationParams = this.props.navigation.state.params
+    var userProfile = ''
+    if (navigationParams) {
+      userProfile = '/' + navigationParams.userId
+    }
+    this.setState({refreshing: true})
+    const requestSentAt = Date.now()
+    fetch(global.API_URL + '/api/profile' + userProfile + '/info', {
+      credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+      const requestFinishedAt = Date.now()
+      const requestTime = requestFinishedAt - requestSentAt
+      const timeout = 350 - requestTime
+
+      setTimeout(() => {
+        if (data.message === 'not logged in') {
+          this.setState({loggedIn: false, refreshing: false})
+        } else {
+          this.setState({profileInfo: data, following: data.following, refreshing: false})
+        }
+      }, timeout > 0 ? timeout: 0)
+
     })
     .catch((error) => {
       console.error(error);
@@ -88,74 +119,116 @@ export default class Profile extends React.Component {
     const navigationParams = this.props.navigation.state.params
     if (!this.state.loggedIn) {
       return (
-        <SafeAreaView>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate('Auth')}>
+        <SafeAreaView style={{alignItems: 'center'}}>
+          <TouchableOpacity style={{marginTop: 300}} onPress={() => this.props.navigation.navigate('Auth')}>
             <Text>Login or signup!</Text>
           </TouchableOpacity>
         </SafeAreaView>
       )
     } else {
       return (
-        <SafeAreaView>
-          <ScrollView
-            refreshControl={
-              <RefreshControl
-                refreshing={this.state.refreshing}
-                onRefresh={this.fetchProfileInfo}
-              />
-            }
-            >
+        <ScrollView
+          style={this.props.selfProfile ? styles.scrollView : null}
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this.refreshProfile}
+            />
+          }
+          >
+          {navigationParams ?
+            <View>
+              <TouchableOpacity style={{marginHorizontal: 20, marginVertical: 10}} onPress={() => this.props.navigation.goBack()}>
+                <Text>Back</Text>
+              </TouchableOpacity>
+            </View>
+            :
+            null
+          }
+          <View style={{alignItems: 'center', padding: 10}}>
+            <Text style={styles.profileName}>{profileInfo.profileName}</Text>
             {navigationParams ?
-              <View>
-                <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-                  <Text>Back</Text>
-                </TouchableOpacity>
-              </View>
+              // <TouchableOpacity onPress={this.state.following ? this.profileUnfollow.bind(this, navigationParams.userId) : this.profileFollow.bind(this, navigationParams.userId)}>
+              //   <Text>{this.state.following ? 'Unfollow' : profileInfo.followsYou ? 'Follow Back' : 'Follow'}</Text>
+              // </TouchableOpacity>
+              null
               :
-              <View>
-                <TouchableOpacity onPress={() => this.props.navigation.navigate('Settings')}>
+              <View style={{flex: 1, flexDirection: 'row'}}>
+                <TouchableOpacity style={styles.profileButtons} onPress={() => this.props.navigation.navigate('Settings')}>
                   <Text>Settings</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.navigation.navigate('Notifications')}>
+                {/* <TouchableOpacity style={styles.profileButtons} onPress={() => this.props.navigation.navigate('Notifications')}>
                   <Text>Notifications</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.navigation.navigate('Messages')}>
-                  <Text>Messages</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.navigation.navigate('Edit',
+                </TouchableOpacity> */}
+                <TouchableOpacity style={styles.profileButtons} onPress={() => this.props.navigation.navigate('Edit',
                   {profileName: profileInfo.profileName, location: profileInfo.location, about: profileInfo.about, refresh: this.fetchProfileInfo})}>
                   <Text>Edit</Text>
                 </TouchableOpacity>
               </View>
             }
-            <View style={{alignItems: 'center'}}>
-              <Text style={styles.textFirst}>{profileInfo.profileName}</Text>
-              {navigationParams ?
-                <TouchableOpacity onPress={this.state.following ? this.profileUnfollow.bind(this, navigationParams.userId) : this.profileFollow.bind(this, navigationParams.userId)}>
-                  <Text>{this.state.following ? 'Unfollow' : profileInfo.followsYou ? 'Follow Back' : 'Follow'}</Text>
-                </TouchableOpacity>
-                :
-                null
-              }
-              <Text>{profileInfo.location}</Text>
-              <Text>{profileInfo.about}</Text>
-              <Text>{'followers'}</Text>
-              <Text>{profileInfo.followers}</Text>
-              <Text>{'following'}</Text>
-              <Text>{profileInfo.following}</Text>
+            <View style={{marginVertical: 10, alignItems: 'center'}}>
+              <Text style={{fontSize: 16, fontWeight: '400', marginBottom: 5}}>{profileInfo.location}</Text>
+              {/* <Text style={{color: '#888888'}}>{profileInfo.about}</Text> */}
             </View>
-            <Rankings navigationParams={navigationParams} />
-            <ProfileFeed navigationParams={navigationParams} />
-          </ScrollView>
-        </SafeAreaView>
+            {/* <View style={{flex: 1, flexDirection: 'row'}}>
+              <Text style={styles.followersLabel}>{'Followers:'}</Text>
+              <Text style={styles.followersNumber}>{profileInfo.followers}</Text>
+              <Text style={styles.followersLabel}>{'Following:'}</Text>
+              <Text style={styles.followersNumber}>{profileInfo.following}</Text>
+            </View> */}
+            <Rankings navigationParams={navigationParams} refreshing={this.state.refreshing} />
+          </View>
+          <View style={styles.feedToggle}>
+            <TouchableOpacity style={styles.feedToggleButton} onPress={() => this.setState({feedToggle: 0})}>
+              <Text style={{padding: 5, color: this.state.feedToggle ? null : 'purple'}}>Posts</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.feedToggleButton} onPress={() => this.setState({feedToggle: 1})}>
+              <Text style={{padding: 5, color: this.state.feedToggle ? 'purple' : null}}>Votes</Text>
+            </TouchableOpacity>
+          </View>
+          {
+            this.state.feedToggle ?
+            <ProfileVotes navigationParams={navigationParams} navigation={this.props.navigation} refreshing={this.state.refreshing} />
+            :
+            <ProfileFeed navigationParams={navigationParams} navigation={this.props.navigation} refreshing={this.state.refreshing} />
+          }
+        </ScrollView>
       )
     }
   }
 }
 const styles = StyleSheet.create({
-  textFirst: {
-    fontSize: 50,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  scrollView: {
+    paddingTop: 50
   },
+  profileName: {
+    paddingVertical: 10,
+    fontSize: 50,
+    fontWeight: 'bold'
+  },
+  profileButtons: {
+    marginHorizontal: 5
+  },
+  followersLabel: {
+    fontSize: 14,
+    marginHorizontal: 5
+  },
+  followersNumber: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginRight: 5
+  },
+  feedToggle: {
+    flex: 0,
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    marginHorizontal: 20,
+    borderColor: '#ccc'
+  },
+  feedToggleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    padding: 10
+  }
 });
