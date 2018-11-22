@@ -16,30 +16,60 @@ export default class Signup extends React.Component {
   }
 
   signup(e) {
-    fetch(global.API_URL + '/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        username: this.state.email,
-        password: this.state.password,
-        confirmPassword: this.state.confirmPassword
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.message === 'not logged in') {
-        this.setState({userId: null});
+    clearCookies().then(data => {
+      if (data.message === 'success') {
+        fetch(global.API_URL + '/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: this.state.email,
+            password: this.state.password,
+            confirmPassword: this.state.confirmPassword
+          })
+        })
+        .then(res => {
+          console.log(res);
+          if (res.headers.get("set-cookie")) {
+            console.log("set cookie is", res.headers.get("set-cookie"));
+            return setCookie(res.headers.get("set-cookie")).then(data => {
+              if (data.message === 'success') {
+                return res.json()
+              } else {
+                console.log(data);
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            })
+          } else {
+            if (res.status === 401) {
+              return {message: 'not logged in'}
+            } else {
+              return res.json()
+            }
+          }
+        })
+        .then(data => {
+          if (data.message === 'not logged in') {
+            this.setState({userId: null});
+          } else {
+            this.props.navigation.dispatch(loggedIn(true))
+            this.props.navigation.navigate('Tabs')
+          }
+        })
+        .catch(function(err) {
+            console.log(err);
+        })
       } else {
-        this.props.setUserId(data.userId)
+        console.log(data);
       }
     })
-    .catch(function(err) {
-        console.log(err);
-    });
+    .catch(err => {
+      console.log(err);
+    })
   }
 
   render() {

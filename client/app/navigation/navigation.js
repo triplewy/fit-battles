@@ -1,7 +1,10 @@
 import React from 'react'
-import { View, AsyncStorage, AppState, PushNotificationIOS } from 'react-native'
+import { View, AsyncStorage, AppState, PushNotificationIOS, Image } from 'react-native'
 import { createBottomTabNavigator, createMaterialTopTabNavigator, createSwitchNavigator, createStackNavigator, NavigationActions } from 'react-navigation'
+import { setCookie, getCookie } from '../Storage'
+import { loggedIn } from '../redux/actions/index.actions'
 // import PushNotification from 'react-native-push-notifications'
+import Splash from '../views/Splash'
 import Battles from '../views/battle/Battles.js'
 import Daily from '../views/leaderboard/Daily.js'
 import Weekly from '../views/leaderboard/Weekly.js'
@@ -19,27 +22,24 @@ import Welcome from '../views/Instructions/Welcome'
 import BattlesInstructions from '../views/Instructions/BattlesInstructions'
 import RankingsInstructions from '../views/Instructions/RankingsInstructions'
 import Final from '../views/Instructions/Final'
-
-const url = global.API_URL
+import statsIcon from '../icons/stats-icon.png'
+import accountIcon from '../icons/account-icon.png'
+import versusIcon from '../icons/versus-icon.png'
 
 export default class TabNavigator extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
-      userId: null
+      loading: true,
     };
 
     this.sessionLogin = this.sessionLogin.bind(this)
     // this.configureNotifications = this.configureNotifications.bind(this)
     // this.handleAppStateChange = this.handleAppStateChange.bind(this)
-    // this.fetchLastVisit = this.fetchLastVisit.bind(this)
-    // this.storeVisit = this.storeVisit.bind(this)
-    this.setUserId = this.setUserId.bind(this)
   }
 
   componentDidMount() {
-    // this.fetchLastVisit()
+    this.sessionLogin()
     // this.configureNotifications()
     // AppState.addEventListener('change', this.handleAppStateChange)
   }
@@ -49,15 +49,17 @@ export default class TabNavigator extends React.Component {
   }
 
   sessionLogin() {
-    fetch(url + '/api/sessionLogin', {
+    fetch(global.API_URL + '/api/sessionLogin', {
       credentials: 'include'
     })
     .then(res => res.json())
     .then(data => {
       if (data.message !== 'not logged in') {
-        this.setState({userId: data})
+        this.setState({loading: false})
+        this.props.dispatch(loggedIn(true))
       } else {
-        this.setState({userId: null})
+        this.setState({loading: false})
+        this.props.dispatch(loggedIn(false))
       }
     })
     .catch((error) => {
@@ -96,42 +98,11 @@ export default class TabNavigator extends React.Component {
   //   }
   // }
 
-  // fetchLastVisit() {
-  //   AsyncStorage.getItem('lastVisit')
-  //   .then(value => {
-  //     this.storeVisit()
-  //     if (value !== null) {
-  //       const lastVisit = new Date(parseInt(value, 10))
-  //       const now = new Date()
-  //       if (lastVisit.getUTCDate() === now.getUTCDate()) {
-  //         this.navigator.dispatch(NavigationActions.navigate({routeName: 'Modal'}))
-  //       }
-  //     }
-  //   })
-  //   .catch(e => {
-  //     console.log(e);
-  //   })
-  // }
-  //
-  // storeVisit() {
-  //   AsyncStorage.setItem('lastVisit', JSON.stringify(Date.now()))
-  //   .then(() => {
-  //     console.log("success");
-  //   })
-  //   .catch(e => {
-  //     console.log(e);
-  //   })
-  // }
-
-  setUserId(userId) {
-    this.setState({userId: userId})
-  }
-
   render() {
     const AuthNavigator = createStackNavigator(
       {
-        Login: props => <Login {...props} setUserId={this.setUserId} />,
-        Signup: props => <Signup {...props} setUserId={this.setUserId} />,
+        Login: Login,
+        Signup: Signup,
       },
       {
         cardStyle: {
@@ -146,7 +117,12 @@ export default class TabNavigator extends React.Component {
 
     const BattleNavigation = createStackNavigator(
       {
-        Battle: Battles,
+        Battle: {
+          screen: Battles,
+          navigationOptions: {
+            title: 'Battle'
+          }
+        },
         UserProfile: {
           screen: props => <Profile {...props} selfProfile />
         }
@@ -155,9 +131,7 @@ export default class TabNavigator extends React.Component {
         cardStyle: {
           backgroundColor: 'white'
         },
-        headerMode: 'none',
         navigationOptions: {
-          headerVisible: false
         }
       }
     )
@@ -279,23 +253,32 @@ export default class TabNavigator extends React.Component {
     const ProfileNavigator = createStackNavigator(
       {
         Profile: {
-          screen: props => <Profile {...props} selfProfile />
+          screen: props => <Profile {...props} selfProfile />,
+          navigationOptions: {
+            title: 'Profile'
+          }
         },
         UserProfile: {
           screen: props => <Profile {...props} selfProfile />
         },
         Settings: {
-          screen: props => <Settings {...props} setUserId={this.setUserId} />
+          screen: Settings,
+          navigationOptions: {
+            title: 'Settings'
+          }
         },
-        Edit: Edit
+        Edit: {
+          screen: Edit,
+          navigationOptions: {
+            title: 'Edit'
+          }
+        }
       },
       {
         cardStyle: {
           backgroundColor: 'white'
         },
-        headerMode: 'none',
         navigationOptions: {
-          headerVisible: false
         }
       }
     )
@@ -322,30 +305,54 @@ export default class TabNavigator extends React.Component {
       {
         Tabs: createBottomTabNavigator(
           {
-            Battles: BattleSwitchNavigator,
             Leaderboard: {
               screen: LeaderboardNavigator,
               navigationOptions: {
-                tabBarLabel: 'Rankings'
+                tabBarLabel: 'Rankings',
+                tabBarIcon: () => (<Image source={statsIcon} style={{width: 50, height: 50, alignItems: 'center'}} />)
               }
             },
-            Upload: UploadNavigator,
+            Battles: {
+              screen: BattleSwitchNavigator,
+              navigationOptions: {
+                tabBarLabel: 'Battles',
+                tabBarIcon: () => (
+                  <View style={{width: 50, height: 50, borderRadius: 30, backgroundColor: 'blue', alignItems: 'center', justifyContent: 'center'}}>
+                    <Image source={versusIcon} style={{width: 40, height: 40, alignItems: 'center'}} />
+                  </View>
+                )
+              }
+            },
+            Profile: {
+              screen: ProfileNavigator,
+              navigationOptions: {
+                tabBarLabel: 'Profile',
+                tabBarIcon: () => (<Image source={accountIcon} style={{width: 50, height: 50, alignItems: 'center'}} />)
+              }
+            },
+            // Upload: UploadNavigator,
             // Feed: FeedNavigator,
-            Profile: ProfileNavigator,
           },
           {
-            tabBarPosition: 'bottom',
-            animationEnabled: true,
-            activeTintColor: '#2EC4B6',
-            inactiveTintColor: '#666',
+            initialRouteName: 'Battles',
             tabBarOptions: {
+              activeTintColor: '#2EC4B6',
+              inactiveTintColor: '#666',
+              showIcon: true,
+              showLabel: false,
+              style: {
+                height: 60
+              },
               tabStyle: {
-                flex: 1,
-                alignItems: 'center'
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 5
               },
               labelStyle: {
                 fontSize: 14,
-                textAlign: 'center'
+                marginLeft: 0,
+                padding: 0
               }
             }
           }
@@ -364,8 +371,14 @@ export default class TabNavigator extends React.Component {
       }
     )
 
-    return (
-      <Tabs />
-    )
+    if (this.state.loading) {
+      return (
+        <Splash />
+      )
+    } else {
+      return (
+        <Tabs />
+      )
+    }
   }
 }

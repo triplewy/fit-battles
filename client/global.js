@@ -1,1 +1,1 @@
-global.API_URL = 'http://localhost:8082'
+global.API_URL = 'http://192.168.1.14:8082'

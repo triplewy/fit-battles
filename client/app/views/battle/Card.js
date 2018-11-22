@@ -79,19 +79,19 @@ export default class Card extends React.Component {
 
   render() {
     const win = Dimensions.get('window');
-    const ratio = (win.width - 20)/this.props.width
+    const ratio = (win.width - 40)/this.props.width
     return (
       <View style={{backgroundColor: 'white', borderRadius: 8, margin: 10}}>
         <DoubleTap onDoubleTap={this.handleFadeAnimation}>
-          <View>
+          <View style={{alignItems: 'center'}}>
             <Animated.View style={{position: 'absolute', opacity: this.fadeValue, backgroundColor: 'rgba(0,0,0,0.4)',
-              top: 0, left: 0, zIndex: 2, height: (win.width - 20) * (4.0 / 3), width: win.width - 20, alignItems: 'center', justifyContent: 'center'}}>
+              top: 0, left: 0, zIndex: 2, height: (win.width - 40) * (4.0 / 3), width: win.width - 40, alignItems: 'center', justifyContent: 'center'}}>
               <Text style={{fontSize: 32, fontWeight: 'bold', color: '#7DD497'}}>Voted</Text>
             </Animated.View>
             <ImageBackground
               resizeMode={'contain'}
               source={{uri: this.props.imageUrl}}
-              style={{width: win.width - 20, height: (win.width - 20) * (4.0 / 3)}}
+              style={{width: win.width - 40, height: (win.width - 40) * (4.0 / 3)}}
               imageStyle={{borderRadius: 8, borderWidth: 1, borderColor: '#ccc'}}
             >
 

@@ -1,7 +1,4 @@
 {
-  "displayName": "Fit Battles",
-  "name": "fitBattles",
-  "expo": {
-    "sdkVersion": "30.0.0"
-  }
+  "name": "fit-battles",
+  "displayName": "fit-battles"
 }

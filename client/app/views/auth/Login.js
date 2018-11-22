@@ -1,11 +1,11 @@
 import React from 'react';
 import { Dimensions, SafeAreaView, View, Text, TextInput, StyleSheet, TouchableOpacity, Button } from 'react-native';
-import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
+import { loggedIn } from '../../redux/actions/index.actions.js'
+import { clearCookies, setCookie } from '../../Storage'
 
 export default class Login extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       email: '',
       password: ''
@@ -15,41 +15,66 @@ export default class Login extends React.Component {
   }
 
   login(e) {
-    fetch(global.API_URL + '/api/auth/signin', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        username: this.state.email,
-        password: this.state.password
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.message === 'not logged in') {
+    clearCookies().then(data => {
+      if (data.message === 'success') {
+        fetch(global.API_URL + '/api/auth/signin', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: this.state.email,
+            password: this.state.password
+          })
+        })
+        .then(res => {
+          console.log(res);
+          if (res.status === 401) {
+            return {message: 'not logged in'}
+          } else if (res.headers.get("set-cookie")) {
+            console.log("set cookie is", res.headers.get("set-cookie"));
+            return setCookie(res.headers.get("set-cookie")).then(data => {
+              if (data.message === 'success') {
+                return res.json()
+              } else {
+                console.log(data);
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            })
+          } else {
+            return res.json()
+          }
+        })
+        .then(data => {
+          if (data.message === 'not logged in') {
+            this.props.navigation.dispatch(loggedIn(false))
+          } else {
+            this.props.navigation.dispatch(loggedIn(true))
+            this.props.navigation.navigate('Tabs')
+          }
+        })
+        .catch(function(err) {
+            console.log(err);
+        });
       } else {
-        this.props.setUserId(data.userId)
+        console.log(data);
       }
     })
-    .catch(function(err) {
-        console.log(err);
-    });
+    .catch(err => {
+      console.log(err);
+    })
   }
 
   render() {
     return (
-      <SafeAreaView style={{flex: 1}}>
-        <TouchableOpacity style={{paddingHorizontal: 30, paddingVertical: 10}} onPress={() => this.props.navigation.navigate('Tabs')}>
-          <Text>Back</Text>
-        </TouchableOpacity>
+      <View style={{flex: 1}}>
         <View style={styles.titleView}>
           <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10}}>Welcome Back</Text>
           <Text style={{color: '#888888'}}>Sign in to continue</Text>
         </View>
-
         <View style={styles.inputView}>
           <Text style={styles.inputLabel}>Your Email</Text>
           <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
@@ -61,7 +86,6 @@ export default class Login extends React.Component {
           <TouchableOpacity style={styles.loginButton} onPress={this.login}>
             <Text style={styles.loginButtonText}>Sign in</Text>
           </TouchableOpacity>
-
           <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
             <Text style={{color: '#888888', marginRight: 5}}>Don't have an account?</Text>
             <TouchableOpacity onPress={() => this.props.navigation.navigate('Signup')}>
@@ -69,8 +93,7 @@ export default class Login extends React.Component {
             </TouchableOpacity>
           </View>
         </View>
-
-      </SafeAreaView>
+      </View>
     );
   }
 }

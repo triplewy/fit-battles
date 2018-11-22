@@ -1,5 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { loggedIn } from '../../redux/actions/index.actions'
 
 export default class Settings extends React.Component {
   constructor(props) {
@@ -23,7 +24,8 @@ export default class Settings extends React.Component {
     .then(res => res.json())
     .then(data => {
       if (data.message === 'success') {
-        this.props.setUserId(null)
+        this.props.navigation.dispatch(loggedIn(false))
+        this.props.navigation.goBack()
       } else {
         console.log("logout failed");
       }
@@ -35,15 +37,11 @@ export default class Settings extends React.Component {
 
   render() {
     return (
-      <SafeAreaView style={{margin: 20}}>
-        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-          <Text>Back</Text>
-        </TouchableOpacity>
-        <Text style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginVertical: 30}}>Settings</Text>
+      <View>
         <TouchableOpacity onPress={this.logout}>
           <Text>Logout</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 }

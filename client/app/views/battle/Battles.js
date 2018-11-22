@@ -1,8 +1,10 @@
 import React from 'react';
 import { Dimensions, SafeAreaView, ScrollView, RefreshControl, View, Text, StyleSheet, Image, TouchableOpacity, TouchableHighlight } from 'react-native';
+import { lastVisit } from '../../Storage'
 import Card from './Card'
 import FeedCard from '../feed/FeedCard'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
+import LinearGradient from 'react-native-linear-gradient'
 import BattlesModal from './BattlesModal'
 
 export default class Battles extends React.Component {
@@ -14,9 +16,11 @@ export default class Battles extends React.Component {
       currentBattle: 0,
       activeSlide: 0,
       endOfBattles: false,
-      refreshing: false
+      refreshing: false,
+      showModal: false
     };
 
+    this.fetchLastVisit = this.fetchLastVisit.bind(this)
     this.fetchBattles = this.fetchBattles.bind(this)
     this.renderItem = this.renderItem.bind(this)
     this.handleVote = this.handleVote.bind(this)
@@ -24,6 +28,33 @@ export default class Battles extends React.Component {
 
   componentDidMount() {
     this.fetchBattles()
+  }
+
+  fetchLastVisit() {
+    lastVisit().then(data => {
+      if (!data.lastVisitToday) {
+        this.setState({showModal: true})
+      }
+    })
+  }
+
+  fetchBattles() {
+    this.setState({refreshing: true})
+    fetch(global.API_URL + '/api/battles', {
+      credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+      if (data.length > 0) {
+        this.setState({battleData: data, currentBattle: 0, refreshing: false})
+      } else {
+        this.setState({endOfBattles: true, refreshing: false})
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   }
 
   renderItem ({item, index}) {
@@ -80,25 +111,6 @@ export default class Battles extends React.Component {
     });
   }
 
-  fetchBattles() {
-    this.setState({refreshing: true})
-    fetch(global.API_URL + '/api/battles', {
-      credentials: 'include'
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log(data);
-      if (data.length > 0) {
-        this.setState({battleData: data, currentBattle: 0, refreshing: false})
-      } else {
-        this.setState({endOfBattles: true, refreshing: false})
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-  }
-
   get pagination () {
    const { battleData, currentBattle, activeSlide } = this.state;
    return (
@@ -144,7 +156,7 @@ export default class Battles extends React.Component {
       if (this.state.battleData.length > 0) {
         return (
           <ScrollView
-            style={{paddingTop: 30, paddingBottom: 30}}
+            style={{paddingTop: 10, paddingBottom: 30}}
             refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}
@@ -152,26 +164,23 @@ export default class Battles extends React.Component {
               />
             }
           >
-            <BattlesModal {...this.props} />
-            <View style={{borderBottomWidth: 1, borderColor: '#ccc', marginHorizontal: 40}}>
-              <Text style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', paddingVertical: 10}}>Battle</Text>
-            </View>
-            <Carousel
-              ref={(c) => { this.carousel = c }}
-              data={this.state.battleData[this.state.currentBattle]}
-              renderItem={this.renderItem}
-              sliderWidth={win.width}
-              itemWidth={win.width}
-              onSnapToItem={(index) => this.setState({activeSlide: index})}
-              layout={'default'}
-            />
-            {this.pagination}
+              {/* <BattlesModal {...this.props} /> */}
+              <Carousel
+                ref={(c) => { this.carousel = c }}
+                data={this.state.battleData[this.state.currentBattle]}
+                renderItem={this.renderItem}
+                sliderWidth={win.width}
+                itemWidth={win.width}
+                onSnapToItem={(index) => this.setState({activeSlide: index})}
+                layout={'default'}
+              />
+              {this.pagination}
           </ScrollView>
         )
       } else {
         return (
           <SafeAreaView>
-            <BattlesModal {...this.props} />
+            {/* <BattlesModal {...this.props} /> */}
             <Text style={{textAlign: 'center', marginTop: 300}}>Loading</Text>
           </SafeAreaView>
         )

@@ -1,36 +1,28 @@
-import React from 'react'
-import { SafeAreaView, AppState } from 'react-native'
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import Navigation from './navigation/navigation.js'
 
-export default class App extends React.Component {
+class App extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
 
     };
 
-    this.handleAppStateChange = this.handleAppStateChange.bind(this)
-
   }
-
-  componentDidMount() {
-    AppState.addEventListener('change', this.handleAppStateChange)
-  }
-
-  componentWillUnmount() {
-    AppState.removeEventListener('change', this.handleAppStateChange)
-  }
-
-  handleAppStateChange(appState) {
-    if (appState === 'background') {
-      console.log("app is in background");
-    }
-  }
-
   render () {
     return (
-      <Navigation />
+      <Navigation {...this.props}/>
     )
   }
 }
+
+const mapStateToProps = (state) => ({
+  state
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  dispatch
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

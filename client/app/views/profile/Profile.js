@@ -136,15 +136,6 @@ export default class Profile extends React.Component {
             />
           }
           >
-          {navigationParams ?
-            <View>
-              <TouchableOpacity style={{marginHorizontal: 20, marginVertical: 10}} onPress={() => this.props.navigation.goBack()}>
-                <Text>Back</Text>
-              </TouchableOpacity>
-            </View>
-            :
-            null
-          }
           <View style={{alignItems: 'center', padding: 10}}>
             <Text style={styles.profileName}>{profileInfo.profileName}</Text>
             {navigationParams ?
@@ -199,7 +190,7 @@ export default class Profile extends React.Component {
 }
 const styles = StyleSheet.create({
   scrollView: {
-    paddingTop: 50
+    // paddingTop: 50
   },
   profileName: {
     paddingVertical: 10,

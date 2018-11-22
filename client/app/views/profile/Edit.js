@@ -71,25 +71,17 @@ export default class Edit extends React.Component {
 
   render() {
     return (
-      <SafeAreaView style={{flex: 1}}>
-        <TouchableOpacity style={{paddingHorizontal: 30, paddingVertical: 10}} onPress={() => this.props.navigation.goBack()}>
-          <Text>Back</Text>
+      <View style={styles.inputView}>
+        <Text style={styles.inputLabel}>Profile name</Text>
+        <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.profileName} onChangeText={(text) => this.setState({profileName: text})}/>
+        <Text style={styles.inputLabel}>Location</Text>
+        <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.location} onChangeText={(text) => this.setState({location: text})}/>
+        {/* <Text style={styles.inputLabel}>About</Text>
+        <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.about} onChangeText={(text) => this.setState({about: text})}/> */}
+        <TouchableOpacity style={styles.loginButton} onPress={this.save.bind(this)}>
+          <Text style={styles.loginButtonText}>Save</Text>
         </TouchableOpacity>
-        <View style={styles.titleView}>
-          <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10}}>Edit Profile</Text>
-        </View>
-        <View style={styles.inputView}>
-          <Text style={styles.inputLabel}>Profile name</Text>
-          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.profileName} onChangeText={(text) => this.setState({profileName: text})}/>
-          <Text style={styles.inputLabel}>Location</Text>
-          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.location} onChangeText={(text) => this.setState({location: text})}/>
-          {/* <Text style={styles.inputLabel}>About</Text>
-          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.about} onChangeText={(text) => this.setState({about: text})}/> */}
-          <TouchableOpacity style={styles.loginButton} onPress={this.save.bind(this)}>
-            <Text style={styles.loginButtonText}>Save</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      </View>
     );
   }
 }

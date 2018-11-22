@@ -43,10 +43,10 @@ export default class Daily extends React.Component {
           source={{ uri: post.imageUrl }}
           style={{width: win.width/2, height: win.width / 2.0 * 4.0 / 3}}
         >
-          <View style={{position: 'absolute', right: 10, top: 10, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.6)'}}>
+          <View style={{position: 'absolute', right: 10, top: 10, backgroundColor: 'rgba(0,0,0,0.6)'}}>
             <Text style={{color: 'white', padding: 5}}>{post.dailyRank + 1}</Text>
           </View>
-          <View style={{position: 'absolute', left: 10, bottom: 10, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.6)', flexDirection: 'row'}}>
+          <View style={{position: 'absolute', left: 10, bottom: 10, backgroundColor: 'rgba(0,0,0,0.6)', flexDirection: 'row'}}>
             <Text style={{color: 'white', paddingVertical: 5, paddingLeft: 3}}>{post.matches ? Math.round(post.wins * 1.0 / post.matches * 100) : 0}</Text>
             <Text style={{color: 'white', paddingVertical: 5, paddingHorizontal: 3}}>%</Text>
           </View>
