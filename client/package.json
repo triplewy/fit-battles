@@ -10,6 +10,7 @@
   "dependencies": {
     "expo": "^31.0.0",
     "ios-deploy": "^1.9.3",
+    "merge": "^1.2.1",
     "react": "^16.6.1",
     "react-devtools": "^3.4.0",
     "react-native": "^0.57.5",
