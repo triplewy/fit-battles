@@ -70,8 +70,8 @@ export default class TabNavigator extends React.Component {
   render() {
     const AuthNavigator = createStackNavigator(
       {
-        Login: Login,
-        Signup: Signup,
+        Login: props => <Login {...props} {...this.props} />,
+        Signup: props => <Signup {...props} {...this.props} />,
       },
       {
         headerMode: 'none',
@@ -98,7 +98,7 @@ export default class TabNavigator extends React.Component {
           screen: props => <Profile {...props} selfProfile />
         },
         Upload: {
-          screen: Upload,
+          screen: props => <Upload {...props} {...this.props} />,
           navigationOptions: {
             title: 'Upload'
           }
@@ -212,15 +212,19 @@ export default class TabNavigator extends React.Component {
           screen: props => <Profile {...props} {...this.props} selfProfile />,
           navigationOptions: ({ navigation }) => ({
             title: 'Profile',
-            headerLeft: (
+            headerLeft: (this.props.state.auth ?
               <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
                 <Image source={settingsIcon} style={{width: 30, height: 30, marginLeft: 15}} />
               </TouchableOpacity>
+              :
+              null
             ),
-            headerRight: (
+            headerRight: (this.props.state.auth ?
               <TouchableOpacity onPress={() => navigation.navigate('Edit')}>
                 <Image source={editIcon} style={{width: 30, height: 30, marginRight: 15}} />
               </TouchableOpacity>
+              :
+              null
             )
           })
         },
@@ -228,7 +232,7 @@ export default class TabNavigator extends React.Component {
           screen: props => <Profile {...props} selfProfile />
         },
         Settings: {
-          screen: Settings,
+          screen: props => <Settings {...props} {...this.props} />,
           navigationOptions: {
             title: 'Settings'
           }

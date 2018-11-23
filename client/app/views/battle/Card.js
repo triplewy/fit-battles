@@ -85,13 +85,13 @@ export default class Card extends React.Component {
             <ImageBackground
               resizeMode={'contain'}
               source={{uri: this.props.imageUrl}}
-              style={{width: win.width - 60, height: (win.width - 60) * (4.0 / 3), shadowOffset:{height: 10}, shadowColor: 'black', shadowOpacity: 0.8}}
+              style={{width: win.width - 60, height: (win.width - 60) * (4.0 / 3), shadowOffset:{height: 10}, shadowColor: 'black', shadowOpacity: 0.75}}
               imageStyle={{borderRadius: 8}}
             >
             </ImageBackground>
           </View>
         </DoubleTap>
-        <View style={{flex: 0, flexDirection: 'column', padding: 10}}>
+        <View style={{flex: 0, flexDirection: 'column', paddingTop: 20, paddingBottom: 10, paddingHorizontal: 10}}>
           <View style={{flexDirection: 'row', marginBottom: 5}}>
             <TouchableOpacity style={{flex: 1}} onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
               <Text style={{fontWeight: '600', fontSize: 18}}>{this.props.profileName}</Text>

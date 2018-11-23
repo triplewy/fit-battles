@@ -51,9 +51,9 @@ export default class Login extends React.Component {
         })
         .then(data => {
           if (data.message === 'not logged in') {
-            this.props.navigation.dispatch(loggedIn(false))
+            this.props.dispatch(loggedIn(false))
           } else {
-            this.props.navigation.dispatch(loggedIn(true))
+            this.props.dispatch(loggedIn(true))
             this.props.navigation.navigate('Tabs')
           }
         })
@@ -73,11 +73,11 @@ export default class Login extends React.Component {
     return (
       <View style={{flex: 1}}>
         <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
-          <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 30}} onPress={() => this.props.navigation.navigate('Tabs')}>
-            <Text style={{color: 'white'}}>Back</Text>
+          <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 40}} onPress={() => this.props.navigation.navigate('Tabs')}>
+            <Text style={{color: 'white', fontSize: 18}}>Back</Text>
           </TouchableOpacity>
           <View style={styles.titleView}>
-            <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10, color: 'white'}}>Welcome Back</Text>
+            <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>Welcome Back</Text>
           </View>
           <View style={styles.inputView}>
             <Text style={styles.inputLabel}>Email</Text>
@@ -88,7 +88,7 @@ export default class Login extends React.Component {
               <Text style={{color: 'white', textAlign: 'right', marginVertical: 20}}>Forgot password?</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={this.login}>
-              <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{alignItems: 'center', borderRadius: 4}}>
+              <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']} style={{alignItems: 'center', borderRadius: 4}}>
                 <Text style={styles.loginButtonText}>Sign in</Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -110,16 +110,17 @@ export default class Login extends React.Component {
 const styles = StyleSheet.create({
   titleView: {
     paddingHorizontal: 30,
-    marginVertical: 30
+    marginTop: 30
   },
   inputView: {
     flex: 1,
-    padding: 30
+    paddingHorizontal: 30
   },
   inputLabel: {
-    marginVertical: 15,
-    fontSize: 14,
-    fontWeight: 'bold',
+    marginTop: 30,
+    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: '500',
     color: 'white'
   },
   textInput: {
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     color: 'white',
     padding: 12,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     borderRadius: 4,
   },

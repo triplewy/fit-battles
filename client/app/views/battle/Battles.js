@@ -119,7 +119,7 @@ export default class Battles extends React.Component {
        <Pagination
          dotsLength={battleData[currentBattle].length}
          activeDotIndex={activeSlide}
-         containerStyle={{ backgroundColor: 'transparent', paddingVertical: 0}}
+         containerStyle={{ backgroundColor: 'transparent', paddingVertical: 10}}
          dotStyle={{
              width: 8,
              height: 8,
@@ -143,7 +143,7 @@ export default class Battles extends React.Component {
     if (this.state.endOfBattles) {
       return (
         <ScrollView
-          style={{paddingTop: 30, marginBottom: 30}}
+          style={{paddingTop: 30}}
           refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
@@ -158,7 +158,7 @@ export default class Battles extends React.Component {
       if (this.state.battleData.length > 0) {
         return (
           <ScrollView
-            style={{paddingTop: 10, paddingBottom: 30}}
+            style={{paddingTop: 10}}
             refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}

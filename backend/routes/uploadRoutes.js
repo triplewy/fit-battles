@@ -26,7 +26,7 @@ module.exports = function(upload, conn, loggedIn) {
     function uploadImageMetadata(req) {
       return new Promise(function(resolve, reject) {
         const body = req.body
-        conn.query('INSERT INTO posts (userId, imageUrl, width, height) VALUES (:userId, :url, :width, :height)', {userId: req.user, url: req.file.location, width: body.width, height: body.height}, function(err, result) {
+        conn.query('INSERT INTO posts (userId, imageUrl) VALUES (:userId, :url)', {userId: req.user, url: req.file.location}, function(err, result) {
           if (err) {
             return reject(err)
           } else {

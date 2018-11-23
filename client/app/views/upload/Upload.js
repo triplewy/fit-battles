@@ -35,7 +35,7 @@ export default class Upload extends React.Component {
         console.log("here1");
         this.props.navigation.navigate('SelectedPhoto', {uri: response.uri})
 
-        ImageResizer.createResizedImage(response.uri, 1080, 1080 * 4 / 3, 'JPEG', 80).then((response) => {
+        ImageResizer.createResizedImage(response.uri, 1080, 1080 * 4 / 3, 'JPEG', 75).then((response) => {
           // response.uri is the URI of the new image that can now be displayed, uploaded...
           // response.path is the path of the new image
           // response.name is the name of the new image with the extension
@@ -53,12 +53,13 @@ export default class Upload extends React.Component {
 
   render() {
     const navigation = this.props.navigation
-    if (true) {
+    console.log(this.props);
+    if (this.props.state.auth) {
       return (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <TouchableOpacity onPress={this.addImage.bind(this)}>
             <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{borderRadius: 8, marginBottom: 20}}>
-              <Text style={{fontSize: 18, color: 'white', paddingVertical: 20, paddingHorizontal: 30}}>Upload</Text>
+              <Text style={{fontSize: 18, color: 'white', paddingVertical: 20, paddingHorizontal: 30}}>Select Photo</Text>
             </LinearGradient>
           </TouchableOpacity>
           <ActivityIndicator size="large" color="#54d7ff" animating={this.state.animating}/>
@@ -66,9 +67,11 @@ export default class Upload extends React.Component {
       )
     } else {
       return (
-        <View>
-          <TouchableOpacity onPress={() => navigation.navigate('Auth')}>
-            <Text style={{textAlign: 'center', marginTop: 300}}>To upload please login or signup</Text>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+          <TouchableOpacity onPress={() => this.props.navigation.navigate('Auth')}>
+            <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{paddingVertical: 20, paddingHorizontal: 30, borderRadius: 8}}>
+              <Text style={{color: 'white', fontSize: 18}}>Login or signup!</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       )

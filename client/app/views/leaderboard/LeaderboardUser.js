@@ -1,7 +1,7 @@
 import React from 'react';
 import {Dimensions, View, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
 
-export default class LeaderboardUser extends React.Component {
+export default class LeaderboardUser extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -12,7 +12,7 @@ export default class LeaderboardUser extends React.Component {
 
   render() {
     const win = Dimensions.get('window');
-    const user = this.props.user
+    const user = this.props
 
     return (
       <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: user.userId})}>

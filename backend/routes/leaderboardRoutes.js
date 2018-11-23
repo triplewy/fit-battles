@@ -68,11 +68,12 @@ module.exports = function(conn, loggedIn) {
       })
     }
 
-    leaderboardRoutes.get('/daily', (req, res) => {
-      console.log('- Request received:', req.method.cyan, '/api/leaderboard/daily');
+    leaderboardRoutes.get('/daily/page=:page', (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/leaderboard/daily/page=' + req.params.page);
+      const start = req.params.page * 10
       conn.query('SELECT a.*, ' +
       '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
-      'FROM posts AS a WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY a.wins * 1.0 / a.matches DESC LIMIT 20', [], function(err, result) {
+      'FROM posts AS a WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY a.wins * 1.0 / a.matches DESC LIMIT ' + start + ', 10', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -81,11 +82,12 @@ module.exports = function(conn, loggedIn) {
       })
     })
 
-    leaderboardRoutes.get('/weekly', (req, res) => {
-      console.log('- Request received:', req.method.cyan, '/api/leaderboard/weekly');
+    leaderboardRoutes.get('/weekly/page=:page', (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/leaderboard/weekly/page=' + req.params.page);
+      const start = req.params.page * 20
       conn.query('SELECT *, ' +
       '(SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) AS wins ' +
-      'FROM users ORDER BY wins DESC LIMIT 20', [], function(err, result) {
+      'FROM users ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -94,9 +96,10 @@ module.exports = function(conn, loggedIn) {
       })
     })
 
-    leaderboardRoutes.get('/allTime', (req, res) => {
-      console.log('- Request received:', req.method.cyan, '/api/leaderboard/allTime');
-      conn.query('SELECT *, (SELECT SUM(wins) FROM posts WHERE userId = users.userId GROUP BY userId) AS wins FROM users ORDER BY wins DESC LIMIT 20', [], function(err, result) {
+    leaderboardRoutes.get('/allTime/page=:page', (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/leaderboard/allTime/page=' + req.params.page);
+      const start = req.params.page * 20
+      conn.query('SELECT *, (SELECT SUM(wins) FROM posts WHERE userId = users.userId GROUP BY userId) AS wins FROM users ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {

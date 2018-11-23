@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
+import LinearGradient from 'react-native-linear-gradient'
 
 export default class Edit extends React.Component {
   constructor(props) {
@@ -9,17 +9,34 @@ export default class Edit extends React.Component {
     const params = this.props.navigation.state.params
 
     this.state = {
-      profileName: params.profileName,
+      profileName: '',
       profileNameAvailable: false,
-      location: params.location,
-      about: params.about
+      location: '',
     };
 
+    this.fetchProfileInfo = this.fetchProfileInfo.bind(this)
     this.checkProfileName = this.checkProfileName.bind(this)
     this.save = this.save.bind(this)
   }
 
   componentDidMount() {
+    this.fetchProfileInfo()
+  }
+
+  fetchProfileInfo() {
+    fetch(global.API_URL + '/api/profile/info', {
+      credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.message === 'not logged in') {
+      } else {
+        this.setState({profileName: data.profileName, location: data.location})
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   }
 
   checkProfileName(e) {
@@ -51,8 +68,7 @@ export default class Edit extends React.Component {
       credentials: 'include',
       body: JSON.stringify({
         profileName: this.state.profileName,
-        location: this.state.location,
-        about: this.state.about
+        location: this.state.location
       })
     })
     .then(res => res.json())
@@ -76,10 +92,10 @@ export default class Edit extends React.Component {
         <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.profileName} onChangeText={(text) => this.setState({profileName: text})}/>
         <Text style={styles.inputLabel}>Location</Text>
         <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.location} onChangeText={(text) => this.setState({location: text})}/>
-        {/* <Text style={styles.inputLabel}>About</Text>
-        <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.about} onChangeText={(text) => this.setState({about: text})}/> */}
-        <TouchableOpacity style={styles.loginButton} onPress={this.save.bind(this)}>
-          <Text style={styles.loginButtonText}>Save</Text>
+        <TouchableOpacity onPress={this.save.bind(this)}>
+          <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{marginTop: 30, alignItems: 'center', borderRadius: 4}}>
+            <Text style={styles.loginButtonText}>Save</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     );
@@ -96,23 +112,19 @@ const styles = StyleSheet.create({
     padding: 30
   },
   inputLabel: {
-    marginVertical: 15,
-    fontSize: 14,
-    fontWeight: 'bold'
+    marginTop: 20,
+    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: '500'
   },
   textInput: {
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#739aff',
     padding: 12,
-    fontSize: 14,
+    fontSize: 16,
     borderRadius: 4,
-  },
-  loginButton: {
-    marginTop: 30,
-    alignItems: 'center',
-    backgroundColor: 'blue',
-    borderRadius: 4
+    backgroundColor: 'white'
   },
   loginButtonText: {
     padding: 15,

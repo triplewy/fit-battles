@@ -1,5 +1,6 @@
 import React from 'react';
 import {Dimensions, FlatList, View, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
+import Leaderboard from './Leaderboard'
 import LeaderboardUser from './LeaderboardUser'
 
 export default class AllTime extends React.Component {
@@ -7,47 +8,12 @@ export default class AllTime extends React.Component {
     super(props);
 
     this.state = {
-      leaderboard: [],
-      refreshing: false
     };
-
-    this.fetchAllTimeLeaderboard = this.fetchAllTimeLeaderboard.bind(this)
-    this.renderItem = this.renderItem.bind(this)
-  }
-
-  componentDidMount() {
-    this.fetchAllTimeLeaderboard()
-  }
-
-  fetchAllTimeLeaderboard() {
-    this.setState({refreshing: true})
-    fetch(global.API_URL + '/api/leaderboard/allTime', {
-      credentials: 'include'
-    })
-    .then(res => res.json())
-    .then(data => {
-      this.setState({leaderboard: data, refreshing: false})
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-  }
-
-  renderItem(item) {
-    return (
-      <LeaderboardUser user={item.item} index={item.index} navigation={this.props.navigation} />
-    )
   }
 
   render() {
     return (
-      <FlatList
-        data={this.state.leaderboard}
-        renderItem={this.renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        onRefresh={this.fetchAllTimeLeaderboard}
-        refreshing={this.state.refreshing}
-      />
+      <Leaderboard API_URL='/api/leaderboard/allTime' dataLength={20} item={LeaderboardUser} {...this.props} />
     )
   }
 }

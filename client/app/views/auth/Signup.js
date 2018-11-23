@@ -56,7 +56,7 @@ export default class Signup extends React.Component {
           if (data.message === 'not logged in') {
             this.setState({userId: null});
           } else {
-            this.props.navigation.dispatch(loggedIn(true))
+            this.props.dispatch(loggedIn(true))
             this.props.navigation.navigate('Tabs')
           }
         })
@@ -76,11 +76,11 @@ export default class Signup extends React.Component {
     return (
       <View style={{flex: 1}}>
         <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
-          <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 30}} onPress={() => this.props.navigation.goBack()}>
-            <Text style={{color: 'white'}}>Back</Text>
+          <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 40}} onPress={() => this.props.navigation.goBack()}>
+            <Text style={{color: 'white', fontSize: 18}}>Back</Text>
           </TouchableOpacity>
           <View style={styles.titleView}>
-            <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10, color: 'white'}}>Create Account</Text>
+            <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>Create Account</Text>
           </View>
           <View style={styles.inputView}>
             <Text style={styles.inputLabel}>Your Email</Text>
@@ -90,7 +90,7 @@ export default class Signup extends React.Component {
             <Text style={styles.inputLabel}>Confirm Password</Text>
             <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({confirmPassword: text})}/>
             <TouchableOpacity onPress={this.signup}>
-              <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{alignItems: 'center', borderRadius: 4, marginTop: 30}}>
+              <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']} style={{alignItems: 'center', borderRadius: 4, marginTop: 30}}>
                 <Text style={styles.loginButtonText}>Sign Up</Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -104,16 +104,17 @@ export default class Signup extends React.Component {
 const styles = StyleSheet.create({
   titleView: {
     paddingHorizontal: 30,
-    marginVertical: 30
+    marginTop: 30
   },
   inputView: {
     flex: 1,
-    padding: 30
+    paddingHorizontal: 30
   },
   inputLabel: {
-    marginVertical: 15,
-    fontSize: 14,
-    fontWeight: 'bold',
+    marginTop: 30,
+    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: '500',
     color: 'white'
   },
   textInput: {
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     color: 'white',
     padding: 12,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     borderRadius: 4,
   },

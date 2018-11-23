@@ -9,12 +9,13 @@ import LinearGradient from 'react-native-linear-gradient'
 export default class Profile extends React.Component {
   constructor(props) {
     super(props);
-    console.log(this.props);
+
     this.state = {
       profileInfo: {},
       following: false,
       refreshing: false,
-      feedToggle: 0
+      feedToggle: 0,
+      loggedIn: true
     };
 
     this.fetchProfileInfo = this.fetchProfileInfo.bind(this)
@@ -46,7 +47,7 @@ export default class Profile extends React.Component {
     .then(res => res.json())
     .then(data => {
       if (data.message === 'not logged in') {
-        this.setState({refreshing: false})
+        this.setState({refreshing: false, loggedIn: false})
       } else {
         this.setState({profileInfo: data, following: data.following, refreshing: false})
       }
@@ -75,7 +76,7 @@ export default class Profile extends React.Component {
 
       setTimeout(() => {
         if (data.message === 'not logged in') {
-          this.setState({refreshing: false})
+          this.setState({refreshing: false, loggedIn: false})
         } else {
           this.setState({profileInfo: data, following: data.following, refreshing: false})
         }
@@ -118,7 +119,7 @@ export default class Profile extends React.Component {
   render() {
     const profileInfo = this.state.profileInfo
     const navigationParams = this.props.navigation.state.params
-    if (false) {
+    if (!this.state.loggedIn) {
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
           <TouchableOpacity onPress={() => this.props.navigation.navigate('Auth')}>
@@ -220,7 +221,7 @@ const styles = StyleSheet.create({
     flex: 0,
     flexDirection: 'row',
     // borderBottomWidth: 1,
-    marginHorizontal: 40,
+    marginHorizontal: 60,
     // borderColor: '#ccc'
   },
   feedToggleButton: {
