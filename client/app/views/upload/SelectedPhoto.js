@@ -23,8 +23,6 @@ export default class SelectedPhoto extends React.Component {
     const selectedPhoto = this.props.navigation.state.params.selectedPhoto
     var formData = new FormData();
     formData.append('image', {uri: selectedPhoto.uri, name: "file"})
-    formData.append('width', selectedPhoto.width);
-    formData.append('height', selectedPhoto.height);
     this.uploadHelper(formData)
   }
 
@@ -50,9 +48,8 @@ export default class SelectedPhoto extends React.Component {
   }
 
   render() {
-    const selectedPhoto = this.props.navigation.state.params.selectedPhoto
+    const selectedPhoto = this.props.navigation.state.params
     const win = Dimensions.get('window');
-    const ratio = win.width/selectedPhoto.width
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const currDate = new Date().toLocaleDateString('en-US', options)
 
@@ -62,7 +59,7 @@ export default class SelectedPhoto extends React.Component {
         <Image
           resizeMode={'contain'}
           source={{uri: selectedPhoto.uri}}
-          style={{width: win.width - 20, height: (win.width - 20) * 4.0 / 3, borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 8, marginBottom: 30}}/>
+          style={{width: win.width - 40, height: (win.width - 40) * 4.0 / 3, borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 8, marginBottom: 30}}/>
         <TouchableOpacity onPress={this.upload}>
           <Text style={{color: '#548EC6'}}>Upload</Text>
         </TouchableOpacity>

@@ -61,6 +61,7 @@ export default class ProfileVotes extends React.Component {
         keyExtractor={(item, index) => index.toString()}
         refreshing={this.state.refreshing}
         onRefresh={this.fetchFeed.bind(this)}
+        contentContainerStyle={{alignItems: 'center'}}
       />
     )
   }

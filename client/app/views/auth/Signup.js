@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView, View, Text, TextInput, StyleSheet, TouchableOpacity, Button } from 'react-native';
-import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
+import LinearGradient from 'react-native-linear-gradient'
 
 export default class Signup extends React.Component {
   constructor(props) {
@@ -74,25 +74,29 @@ export default class Signup extends React.Component {
 
   render() {
     return (
-      <SafeAreaView style={{flex: 1}}>
-        <TouchableOpacity style={{paddingHorizontal: 30}} onPress={() => this.props.navigation.goBack()}>
-          <Text>Back</Text>
-        </TouchableOpacity>
-        <View style={styles.titleView}>
-          <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10}}>Sign up</Text>
-        </View>
-        <View style={styles.inputView}>
-          <Text style={styles.inputLabel}>Your Email</Text>
-          <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
-          <Text style={styles.inputLabel}>Password</Text>
-          <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({password: text})}/>
-          <Text style={styles.inputLabel}>Confirm Password</Text>
-          <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({confirmPassword: text})}/>
-          <TouchableOpacity style={styles.loginButton} onPress={this.signup}>
-            <Text style={styles.loginButtonText}>Sign Up</Text>
+      <View style={{flex: 1}}>
+        <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
+          <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 30}} onPress={() => this.props.navigation.goBack()}>
+            <Text style={{color: 'white'}}>Back</Text>
           </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+          <View style={styles.titleView}>
+            <Text style={{fontSize: 24, fontWeight: 'bold', marginVertical: 10, color: 'white'}}>Create Account</Text>
+          </View>
+          <View style={styles.inputView}>
+            <Text style={styles.inputLabel}>Your Email</Text>
+            <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
+            <Text style={styles.inputLabel}>Password</Text>
+            <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({password: text})}/>
+            <Text style={styles.inputLabel}>Confirm Password</Text>
+            <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({confirmPassword: text})}/>
+            <TouchableOpacity onPress={this.signup}>
+              <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{alignItems: 'center', borderRadius: 4, marginTop: 30}}>
+                <Text style={styles.loginButtonText}>Sign Up</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+      </View>
     );
   }
 }
@@ -109,21 +113,18 @@ const styles = StyleSheet.create({
   inputLabel: {
     marginVertical: 15,
     fontSize: 14,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: 'white'
   },
   textInput: {
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderWidth: 2,
+    borderColor: 'white',
+    color: 'white',
     padding: 12,
     fontSize: 14,
+    fontWeight: 'bold',
     borderRadius: 4,
-  },
-  loginButton: {
-    alignItems: 'center',
-    backgroundColor: 'blue',
-    borderRadius: 4,
-    marginVertical: 30
   },
   loginButtonText: {
     padding: 15,

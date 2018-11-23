@@ -130,32 +130,27 @@ export default class FeedCard extends React.Component {
   render() {
     const win = Dimensions.get('window');
     return (
-      <View style={{backgroundColor: 'white', borderRadius: 8, marginBottom: 40, marginTop: 10, padding: 10}}>
-        <DoubleTap onDoubleTap={this.state.voted ? this.cardUnvote : this.cardVote}>
+      <View style={{backgroundColor: 'white', borderRadius: 8, marginBottom: 40, marginTop: 10, width: win.width - 60}}>
+        {/* <DoubleTap onDoubleTap={this.state.voted ? this.cardUnvote : this.cardVote}> */}
           <ImageBackground
             source={{uri: this.props.imageUrl}}
             resizeMode={'contain'}
-            style={{width: win.width - 20, height: (win.width - 20) * (4.0 / 3), borderRadius: 8}}
-            imageStyle={{borderRadius: 8, borderWidth: 1, borderColor: '#ccc'}}
+            style={{width: win.width - 60, height: (win.width - 60) * (4.0 / 3), borderRadius: 8, shadowOffset:{height: 10}, shadowColor: 'black', shadowOpacity: 0.8}}
+            imageStyle={{borderRadius: 8}}
           >
-            <Text style={{position: 'absolute', right: 10, bottom: 10}}>{this.state.voted ? 'Voted' : null}</Text>
+            {/* <Text style={{position: 'absolute', right: 10, bottom: 10}}>{this.state.voted ? 'Voted' : null}</Text> */}
           </ImageBackground>
-        </DoubleTap>
+        {/* </DoubleTap> */}
         <View style={{flex: 0, flexDirection: 'column', padding: 10}}>
-          <View style={{flex: 0, flexDirection: 'row'}}>
-            <View style={{flex: 1, flexDirection: 'column'}}>
-              <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
-                <Text style={{fontWeight: '600', fontSize: 18, marginBottom: 5}}>{this.props.profileName}</Text>
-              </TouchableOpacity>
-              <Text>{formatDate(this.props.dateTime)}</Text>
-            </View>
-            <View>
-              <View style={{flex: 1, flexDirection: 'row'}}>
-                <Text style={{fontWeight: '600', fontSize: 18}}>Rank: #</Text>
-                <Text style={{fontWeight: '600', fontSize: 18}}>{this.props.dailyRank + 1}</Text>
-              </View>
-              <Text style={{textAlign: 'right'}}>{this.state.matches ? Math.round(this.state.wins * 1.0 / this.state.matches * 100) + '%' : 0 + '%'}</Text>
-            </View>
+          <View style={{marginBottom: 5, flexDirection: 'row'}}>
+            <TouchableOpacity style={{flex: 1}} onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
+              <Text style={{fontWeight: '600', fontSize: 18}}>{this.props.profileName}</Text>
+            </TouchableOpacity>
+            <Text style={{fontSize: 18, fontWeight: '600'}}>{'#' + (this.props.dailyRank + 1)}</Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{color: '#66757f', flex: 1}}>{formatDate(this.props.dateTime)}</Text>
+            <Text style={{color: this.props.wins / this.props.matches >= 0.5 ? '#9FDD9A' : 'red'}}>{this.state.matches ? Math.round(this.state.wins * 1.0 / this.state.matches * 100) + '%' : 0 + '%'}</Text>
           </View>
           {this.props.isPoster ?
             <TouchableOpacity onPress={this.showAlert}>

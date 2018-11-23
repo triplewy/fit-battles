@@ -59,7 +59,9 @@ export default class Battles extends React.Component {
 
   renderItem ({item, index}) {
     return (
-      <Card {...item} index={index} handleVote={this.handleVote} navigation={this.props.navigation}/>
+      <View style={{alignItems: 'center'}}>
+        <Card {...item} index={index} handleVote={this.handleVote} navigation={this.props.navigation}/>
+      </View>
     )
   }
 
@@ -123,7 +125,7 @@ export default class Battles extends React.Component {
              height: 8,
              borderRadius: 5,
              marginHorizontal: 2,
-             backgroundColor: 'rgba(0, 0, 0, 0.8)'
+             backgroundColor: '#739aff'
          }}
          inactiveDotStyle={{
              // Define styles for inactive dots here

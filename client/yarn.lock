@@ -3719,6 +3719,11 @@ merge@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/merge/-/merge-1.2.0.tgz#7531e39d4949c281a66b8c5a6e0265e8b05894da"
 
+merge@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/merge/-/merge-1.2.1.tgz#38bebf80c3220a8a487b6fcfb3941bb11720c145"
+  integrity sha512-VjFo4P5Whtj4vsLzsYBu5ayHhoHJ0UqNm7ibvShmbmoz7tGi0vXaoJbGdB+GmDMLUdg8DpQXEIeVDAe8MaABvQ==
+
 metro-babel-register@^0.48.1:
   version "0.48.3"
   resolved "https://registry.yarnpkg.com/metro-babel-register/-/metro-babel-register-0.48.3.tgz#459b9e5bd635775e342109b6acd70fd63c731f57"
@@ -4786,12 +4791,22 @@ react-native-gesture-handler@1.0.9:
     invariant "^2.2.2"
     prop-types "^15.5.10"
 
+react-native-image-picker@^0.27.1:
+  version "0.27.1"
+  resolved "https://registry.yarnpkg.com/react-native-image-picker/-/react-native-image-picker-0.27.1.tgz#32877c667e8c2713466fe178a6c7dd648e6cb5d3"
+  integrity sha512-LuEt5I9TFe3+lfN8E9geuN2OOgnld0QmeHRPTCV+mzkT5zASsoibNIUItt6WQBWG4nXC/90aufQYZn92i3lTxw==
+
+react-native-image-resizer@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-image-resizer/-/react-native-image-resizer-1.0.0.tgz#d47e14943c37938e287fbd639e4db7ceb7fd8917"
+  integrity sha1-1H4UlDw3k44of71jnk23zrf9iRc=
+
 react-native-linear-gradient@^2.4.4:
   version "2.4.4"
   resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.4.4.tgz#64944a39290eefbede18dfd7e9551f1ef61e3de7"
   integrity sha512-j2py4Q/9kbbAERe+zZM/ZKjhhe83hYqREECGVfRJxcI1PYf4VPWJ0eth/1EUUTGiRMol8L0M5Zj8MK/KqdhYhw==
 
-"react-native-maps@github:expo/react-native-maps#v0.22.1-exp.0":
+react-native-maps@expo/react-native-maps#v0.22.1-exp.0:
   version "0.22.1"
   resolved "https://codeload.github.com/expo/react-native-maps/tar.gz/e6f98ff7272e5d0a7fe974a41f28593af2d77bb2"
 

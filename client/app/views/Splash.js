@@ -12,7 +12,7 @@ export default class Splash extends React.Component {
 
   render() {
     return (
-      <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.linearGradient}>
+      <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
           <Text style={{textAlign: 'center', fontSize: 48, fontWeight: 'bold', color: 'white'}}>Fit Battles</Text>
         </View>

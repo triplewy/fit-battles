@@ -1,5 +1,6 @@
 import React from 'react';
 import {Dimensions, ImageBackground, Image, View, ScrollView, FlatList, StyleSheet, Text, TouchableHighlight, TouchableOpacity} from 'react-native';
+import FeedCard from '../feed/FeedCard'
 
 export default class Daily extends React.Component {
   constructor(props) {
@@ -34,24 +35,28 @@ export default class Daily extends React.Component {
 
   renderItem(item) {
     const post = item.item;
-    const win = Dimensions.get('window');
-    const ratio = (win.width/2)/post.width
+    // const win = Dimensions.get('window');
+    // const ratio = (win.width/2)/post.width
+    // return (
+    //   <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: post.userId})}>
+    //     <ImageBackground
+    //       resizeMode={'contain'}
+    //       source={{ uri: post.imageUrl }}
+    //       style={{width: win.width/2, height: win.width / 2.0 * 4.0 / 3}}
+    //     >
+    //       <View style={{position: 'absolute', right: 10, top: 10, backgroundColor: 'rgba(0,0,0,0.6)'}}>
+    //         <Text style={{color: 'white', padding: 5}}>{post.dailyRank + 1}</Text>
+    //       </View>
+    //       <View style={{position: 'absolute', left: 10, bottom: 10, backgroundColor: 'rgba(0,0,0,0.6)', flexDirection: 'row'}}>
+    //         <Text style={{color: 'white', paddingVertical: 5, paddingLeft: 3}}>{post.matches ? Math.round(post.wins * 1.0 / post.matches * 100) : 0}</Text>
+    //         <Text style={{color: 'white', paddingVertical: 5, paddingHorizontal: 3}}>%</Text>
+    //       </View>
+    //     </ImageBackground>
+    //   </TouchableOpacity>
+    // )
+
     return (
-      <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: post.userId})}>
-        <ImageBackground
-          resizeMode={'contain'}
-          source={{ uri: post.imageUrl }}
-          style={{width: win.width/2, height: win.width / 2.0 * 4.0 / 3}}
-        >
-          <View style={{position: 'absolute', right: 10, top: 10, backgroundColor: 'rgba(0,0,0,0.6)'}}>
-            <Text style={{color: 'white', padding: 5}}>{post.dailyRank + 1}</Text>
-          </View>
-          <View style={{position: 'absolute', left: 10, bottom: 10, backgroundColor: 'rgba(0,0,0,0.6)', flexDirection: 'row'}}>
-            <Text style={{color: 'white', paddingVertical: 5, paddingLeft: 3}}>{post.matches ? Math.round(post.wins * 1.0 / post.matches * 100) : 0}</Text>
-            <Text style={{color: 'white', paddingVertical: 5, paddingHorizontal: 3}}>%</Text>
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
+      <FeedCard {...post} navigation={this.props.navigation} />
     )
   }
 
@@ -59,11 +64,11 @@ export default class Daily extends React.Component {
     return (
       <FlatList
         data={this.state.leaderboard}
-        numColumns={2}
         renderItem={this.renderItem}
-        keyExtractor={(item, index) => index}
+        keyExtractor={(item, index) => index.toString()}
         onRefresh={this.fetchDailyLeaderboard}
         refreshing={this.state.refreshing}
+        contentContainerStyle={{alignItems: 'center'}}
       />
     )
   }

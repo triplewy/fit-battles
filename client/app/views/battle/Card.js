@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dimensions, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, Animated, Easing } from 'react-native';
 import DoubleTap from '../DoubleTap'
-import {follow, unfollow} from '../Follow'
+import { follow, unfollow } from '../Follow'
 import { formatDate } from '../Date'
 
 export default class Card extends React.Component {
@@ -70,55 +70,36 @@ export default class Card extends React.Component {
         }
       ).start(() => this.props.handleVote(this.props.index))
     }, 500)
-
-
-
-
   }
-
 
   render() {
     const win = Dimensions.get('window');
-    const ratio = (win.width - 40)/this.props.width
     return (
-      <View style={{backgroundColor: 'white', borderRadius: 8, margin: 10}}>
+      <View style={{backgroundColor: 'white', borderRadius: 8, margin: 10, width: win.width - 60, justifyContent: 'center'}}>
         <DoubleTap onDoubleTap={this.handleFadeAnimation}>
           <View style={{alignItems: 'center'}}>
-            <Animated.View style={{position: 'absolute', opacity: this.fadeValue, backgroundColor: 'rgba(0,0,0,0.4)',
-              top: 0, left: 0, zIndex: 2, height: (win.width - 40) * (4.0 / 3), width: win.width - 40, alignItems: 'center', justifyContent: 'center'}}>
+            <Animated.View style={{position: 'absolute', opacity: this.fadeValue, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 8,
+              top: 0, left: 0, zIndex: 2, height: (win.width - 60) * (4.0 / 3), width: win.width - 60, alignItems: 'center', justifyContent: 'center'}}>
               <Text style={{fontSize: 32, fontWeight: 'bold', color: '#7DD497'}}>Voted</Text>
             </Animated.View>
             <ImageBackground
               resizeMode={'contain'}
               source={{uri: this.props.imageUrl}}
-              style={{width: win.width - 40, height: (win.width - 40) * (4.0 / 3)}}
-              imageStyle={{borderRadius: 8, borderWidth: 1, borderColor: '#ccc'}}
+              style={{width: win.width - 60, height: (win.width - 60) * (4.0 / 3), shadowOffset:{height: 10}, shadowColor: 'black', shadowOpacity: 0.8}}
+              imageStyle={{borderRadius: 8}}
             >
-
-
-              {/* <Text style={{position: 'absolute', right: 10, top: 10}}>{(this.props.index + 1) + '/2'}</Text>
-              {this.state.voted &&
-                <Text style={{textAlign: 'center', fontSize: 32, fontWeight: 'bold', color: 'green', marginTop: 100}}>Voted</Text>
-              } */}
             </ImageBackground>
           </View>
-
-
-
         </DoubleTap>
         <View style={{flex: 0, flexDirection: 'column', padding: 10}}>
-          <View style={{flex: 0, flexDirection: 'row'}}>
-            <View style={{flex: 1, flexDirection: 'column'}}>
-              <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
-                <Text style={{fontWeight: '600', fontSize: 18, marginBottom: 5}}>{this.props.profileName}</Text>
-              </TouchableOpacity>
-              <Text>{formatDate(this.props.dateTime)}</Text>
-            </View>
-            <View style={{flex: 1, flexDirection: 'column'}}>
-              <Text style={{textAlign: 'right'}}>{this.props.matches ? Math.round(this.props.wins * 1.0 / this.props.matches * 100) + '%' : 0 + '%'}</Text>
-            </View>
+          <View style={{flexDirection: 'row', marginBottom: 5}}>
+            <TouchableOpacity style={{flex: 1}} onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
+              <Text style={{fontWeight: '600', fontSize: 18}}>{this.props.profileName}</Text>
+            </TouchableOpacity>
+            <Text style={{fontWeight: '600', fontSize: 18, color: this.props.wins / this.props.matches >= 0.5 ? '#9FDD9A' : 'red'}}>{this.props.matches ? Math.round(this.props.wins * 1.0 / this.props.matches * 100) + '%' : 0 + '%'}</Text>
+            {/* <Text>{formatDate(this.props.dateTime)}</Text> */}
           </View>
-          <Text style={{marginVertical: 5}}>{this.props.location}</Text>
+          <Text style={{color: '#66757f'}}>{this.props.location}</Text>
           {/* {this.props.isPoster ?
             <TouchableOpacity onPress={this.showAlert}>
               <Text>More</Text>
@@ -128,7 +109,6 @@ export default class Card extends React.Component {
               <Text>{this.state.following ? 'Unfollow' : this.props.followsYou ? 'Follow Back' : 'Follow'}</Text>
             </TouchableOpacity>
           } */}
-
         </View>
       </View>
     )
