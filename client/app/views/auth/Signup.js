@@ -1,6 +1,10 @@
 import React from 'react';
-import { SafeAreaView, View, Text, TextInput, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import { KeyboardAvoidingView, View, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { loggedIn } from '../../redux/actions/index.actions.js'
+import { clearCookies, setCookie } from '../../Storage'
 import LinearGradient from 'react-native-linear-gradient'
+import backIcon from '../../icons/back-icon.png'
+import validator from 'validator'
 
 export default class Signup extends React.Component {
   constructor(props) {
@@ -8,95 +12,120 @@ export default class Signup extends React.Component {
 
     this.state = {
       email: '',
+      emailMessage: '',
       password: '',
-      confirmPassword: ''
+      passwordMessage: '',
+      confirmPassword: '',
+      confirmPasswordMessage: '',
+      submitted: false
     };
 
     this.signup = this.signup.bind(this)
   }
 
   signup(e) {
-    clearCookies().then(data => {
-      if (data.message === 'success') {
-        fetch(global.API_URL + '/api/auth/signup', {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: this.state.email,
-            password: this.state.password,
-            confirmPassword: this.state.confirmPassword
+    this.setState({submitted: true, emailMessage: '', passwordMessage: '', confirmPasswordMessage: ''})
+    if (!validator.isEmail(this.state.email)) {
+      this.setState({emailMessage: 'Invalid Email', submitted: false})
+    } else if (this.state.password.length < 6) {
+      this.setState({passwordMessage: 'Less than 6 characters', submitted: false})
+    } else if (this.state.password !== this.state.confirmPassword) {
+      this.setState({confirmPasswordMessage: 'Does not match password', submitted: false})
+    } else {
+      clearCookies().then(data => {
+        if (data.message === 'success') {
+          fetch(global.API_URL + '/api/auth/signup', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: this.state.email,
+              password: this.state.password,
+              confirmPassword: this.state.confirmPassword
+            })
           })
-        })
-        .then(res => {
-          console.log(res);
-          if (res.headers.get("set-cookie")) {
-            console.log("set cookie is", res.headers.get("set-cookie"));
-            return setCookie(res.headers.get("set-cookie")).then(data => {
-              if (data.message === 'success') {
-                return res.json()
+          .then(res => {
+            console.log(res);
+            if (res.status === 200) {
+              if (res.headers.get("set-cookie")) {
+                console.log("set cookie is", res.headers.get("set-cookie"));
+                return setCookie(res.headers.get("set-cookie")).then(data => {
+                  if (data.message === 'success') {
+                    return res.json()
+                  } else {
+                    console.log(data);
+                  }
+                })
+                .catch(err => {
+                  console.log(err);
+                })
               } else {
-                console.log(data);
+                return res.json()
               }
-            })
-            .catch(err => {
-              console.log(err);
-            })
-          } else {
-            if (res.status === 401) {
-              return {message: 'not logged in'}
             } else {
-              return res.json()
+              return {message: 'not logged in'}
             }
-          }
-        })
-        .then(data => {
-          if (data.message === 'not logged in') {
-            this.setState({userId: null});
-          } else {
-            this.props.dispatch(loggedIn(true))
-            this.props.navigation.navigate('Tabs')
-          }
-        })
-        .catch(function(err) {
-            console.log(err);
-        })
-      } else {
-        console.log(data);
-      }
-    })
-    .catch(err => {
-      console.log(err);
-    })
+          })
+          .then(data => {
+            if (data.message === 'not logged in') {
+              this.setState({submitted: false, emailMessage: 'Email in use'})
+            } else {
+              this.setState({submitted: false})
+              this.props.dispatch(loggedIn(true))
+              this.props.navigation.navigate('Tabs')
+            }
+          })
+          .catch(function(err) {
+              console.log(err);
+          })
+        } else {
+          console.log(data);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    }
   }
 
   render() {
     return (
-      <View style={{flex: 1}}>
-        <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
-          <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 40}} onPress={() => this.props.navigation.goBack()}>
-            <Text style={{color: 'white', fontSize: 18}}>Back</Text>
-          </TouchableOpacity>
-          <View style={styles.titleView}>
-            <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>Create Account</Text>
-          </View>
-          <View style={styles.inputView}>
-            <Text style={styles.inputLabel}>Your Email</Text>
-            <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
-            <Text style={styles.inputLabel}>Password</Text>
-            <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({password: text})}/>
-            <Text style={styles.inputLabel}>Confirm Password</Text>
-            <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({confirmPassword: text})}/>
-            <TouchableOpacity onPress={this.signup}>
-              <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']} style={{alignItems: 'center', borderRadius: 4, marginTop: 30}}>
-                <Text style={styles.loginButtonText}>Sign Up</Text>
-              </LinearGradient>
+      <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
+        <ScrollView>
+          <KeyboardAvoidingView behavior="position">
+            <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 40}} onPress={() => this.props.navigation.goBack()}>
+              <Image source={backIcon} style={{width: 30, height: 30}} />
             </TouchableOpacity>
-          </View>
-        </LinearGradient>
-      </View>
+            <View style={styles.titleView}>
+              <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>Create Account</Text>
+            </View>
+            <View style={styles.inputView}>
+              <View style={{flexDirection: 'row', marginTop: 30, marginBottom: 10}}>
+                <Text style={styles.inputLabel}>Your Email</Text>
+                <Text style={{color: 'red', fontSize: 16, fontWeight: '500'}}>{this.state.emailMessage}</Text>
+              </View>
+              <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
+              <View style={{flexDirection: 'row', marginTop: 30, marginBottom: 10}}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <Text style={{color: 'red', fontSize: 16, fontWeight: '500'}}>{this.state.passwordMessage}</Text>
+              </View>
+              <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({password: text})}/>
+              <View style={{flexDirection: 'row', marginTop: 30, marginBottom: 10}}>
+                <Text style={styles.inputLabel}>Confirm Password</Text>
+                <Text style={{color: 'red', fontSize: 16, fontWeight: '500'}}>{this.state.confirmPasswordMessage}</Text>
+              </View>
+              <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({confirmPassword: text})}/>
+              <TouchableOpacity onPress={this.signup} disabled={this.state.submitted}>
+                <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']} style={{alignItems: 'center', borderRadius: 4, marginTop: 30}}>
+                  <Text style={styles.loginButtonText}>Sign Up</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </ScrollView>
+      </LinearGradient>
     );
   }
 }
@@ -111,8 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30
   },
   inputLabel: {
-    marginTop: 30,
-    marginBottom: 10,
+    flex: 1,
     fontSize: 16,
     fontWeight: '500',
     color: 'white'

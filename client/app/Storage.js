@@ -62,12 +62,12 @@ export function lastVisit() {
           const lastVisit = new Date(parseInt(value, 10))
           const now = new Date()
           if (lastVisit.getUTCDate() === now.getUTCDate()) {
-            return resolve({lastVisitToday: true})
+            return resolve({lastVisit: 'today'})
           } else {
-            return resolve({lastVisitToday: false})
+            return resolve({lastVisitToday: 'not today'})
           }
         } else {
-          return resolve({lastVisitToday: true})
+          return resolve({lastVisitToday: 'never'})
         }
       }).catch(e => {
         console.log(e);

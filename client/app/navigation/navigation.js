@@ -5,6 +5,7 @@ import { setCookie, getCookie } from '../Storage'
 import { loggedIn } from '../redux/actions/index.actions'
 import LinearGradient from 'react-native-linear-gradient'
 import Splash from '../views/Splash'
+import Loading from '../views/Loading'
 import Battles from '../views/battle/Battles.js'
 import Daily from '../views/leaderboard/Daily.js'
 import Weekly from '../views/leaderboard/Weekly.js'
@@ -17,9 +18,9 @@ import Settings from '../views/profile/Settings.js'
 import Edit from '../views/profile/Edit.js'
 import Login from '../views/auth/Login.js'
 import Signup from '../views/auth/Signup.js'
-import WinnerModal from '../views/winners/Modal.js'
 import Welcome from '../views/Instructions/Welcome'
 import BattlesInstructions from '../views/Instructions/BattlesInstructions'
+import VoteInstructions from '../views/Instructions/VoteInstructions'
 import RankingsInstructions from '../views/Instructions/RankingsInstructions'
 import Final from '../views/Instructions/Final'
 import leaderboardIconActive from '../icons/leaderboard-icon-active.png'
@@ -39,9 +40,11 @@ export default class TabNavigator extends React.Component {
     console.log(props);
     this.state = {
       loading: true,
+      animationEnded: false
     };
 
     this.sessionLogin = this.sessionLogin.bind(this)
+    this.setAnimationEnded = this.setAnimationEnded.bind(this)
   }
 
   componentDidMount() {
@@ -65,6 +68,10 @@ export default class TabNavigator extends React.Component {
     .catch((error) => {
       console.error(error);
     });
+  }
+
+  setAnimationEnded() {
+    this.setState({animationEnded: true})
   }
 
   render() {
@@ -95,7 +102,10 @@ export default class TabNavigator extends React.Component {
           })
         },
         UserProfile: {
-          screen: props => <Profile {...props} selfProfile />
+          screen: props => <Profile {...props} selfProfile />,
+          navigationOptions: {
+            title: 'Profile'
+          }
         },
         Upload: {
           screen: props => <Upload {...props} {...this.props} />,
@@ -133,8 +143,18 @@ export default class TabNavigator extends React.Component {
       {
         Welcome: Welcome,
         BattlesInstructions: BattlesInstructions,
+        VoteInstructions: VoteInstructions,
         RankingsInstructions: RankingsInstructions,
         Final: Final
+      },
+      {
+        headerMode: 'none',
+        navigationOptions: {
+          headerVisible: false,
+          cardStack: {
+            gesturesEnabled: false,
+          },
+        }
       }
     )
 
@@ -322,6 +342,7 @@ export default class TabNavigator extends React.Component {
           }
         ),
         Auth: AuthNavigator,
+        Instructions: InstructionsNavigator,
         // UserProfile: Profile
       },
       {
@@ -337,15 +358,21 @@ export default class TabNavigator extends React.Component {
 
     if (this.state.loading) {
       return (
-        <Splash />
+        <Loading />
       )
     } else {
-      return (
-        <View style={{flex: 1}}>
-          <StatusBar barStyle="light-content" />
-          <Tabs />
-        </View>
-      )
+      if (this.state.animationEnded) {
+        return (
+          <View style={{flex: 1}}>
+            <StatusBar barStyle="light-content" />
+            <Tabs />
+          </View>
+        )
+      } else {
+        return (
+          <Splash setAnimationEnded={this.setAnimationEnded}/>
+        )
+      }
     }
   }
 }

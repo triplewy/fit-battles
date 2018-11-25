@@ -15,24 +15,20 @@ export default class Profile extends React.Component {
       following: false,
       refreshing: false,
       feedToggle: 0,
-      loggedIn: true
+      loggedIn: true,
+      page: 0,
+      finished: false
     };
 
     this.fetchProfileInfo = this.fetchProfileInfo.bind(this)
     this.refreshProfile = this.refreshProfile.bind(this)
     this.profileFollow = this.profileFollow.bind(this)
     this.profileUnfollow = this.profileUnfollow.bind(this)
+    this.updatePage = this.updatePage.bind(this)
   }
 
   componentDidMount() {
     this.fetchProfileInfo()
-  }
-
-  componentDidUpdate(prevProps) {
-    console.log(this.props);
-    // if (this.props.state.auth !== prevProps.state.auth) {
-    //   this.fetchProfileInfo()
-    // }
   }
 
   fetchProfileInfo() {
@@ -116,9 +112,18 @@ export default class Profile extends React.Component {
     })
   }
 
+  updatePage() {
+    this.setState({page: this.state.page + 1})
+  }
+
   render() {
     const profileInfo = this.state.profileInfo
     const navigationParams = this.props.navigation.state.params
+    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
+      const paddingToBottom = 20;
+      return layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom;
+    }
+
     if (!this.state.loggedIn) {
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
@@ -140,7 +145,14 @@ export default class Profile extends React.Component {
               style={{backgroundColor: 'white'}}
             />
           }
-          >
+          onScroll={({nativeEvent}) => {
+            if (isCloseToBottom(nativeEvent) && !this.state.finished) {
+              console.log("herererere");
+              this.updatePage();
+            }
+          }}
+          scrollEventThrottle={400}
+        >
           <View style={{backgroundColor: 'white', borderRadius: 12, marginBottom: 10}}>
             <View style={{alignItems: 'center', padding: 10}}>
               <Text style={styles.profileName}>{profileInfo.profileName}</Text>
@@ -177,19 +189,31 @@ export default class Profile extends React.Component {
               <Rankings navigationParams={navigationParams} refreshing={this.state.refreshing} />
             </View>
             <View style={styles.feedToggle}>
-              <TouchableOpacity style={[styles.feedToggleButton, {borderBottomWidth: 2, borderColor: this.state.feedToggle ? 'white' : '#739aff'}]} onPress={() => this.setState({feedToggle: 0})}>
+              <TouchableOpacity style={[styles.feedToggleButton, {borderBottomWidth: 2, borderColor: this.state.feedToggle ? 'white' : '#739aff'}]} onPress={() => this.setState({feedToggle: 0, page: 0, finished: false})}>
                 <Text style={{padding: 5, fontWeight: '400', fontSize: 16, color: this.state.feedToggle ? '#66757f' : '#739aff'}}>Posts</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.feedToggleButton, {borderBottomWidth: 2, borderColor: this.state.feedToggle ? '#739aff' : 'white'}]} onPress={() => this.setState({feedToggle: 1})}>
+              <TouchableOpacity style={[styles.feedToggleButton, {borderBottomWidth: 2, borderColor: this.state.feedToggle ? '#739aff' : 'white'}]} onPress={() => this.setState({feedToggle: 1, page: 0, finished: false})}>
                 <Text style={{padding: 5, fontWeight: '400', fontSize: 16, color: this.state.feedToggle ? '#739aff' : '#66757f'}}>Votes</Text>
               </TouchableOpacity>
             </View>
           </View>
           {
             this.state.feedToggle ?
-            <ProfileVotes navigationParams={navigationParams} navigation={this.props.navigation} refreshing={this.state.refreshing} />
+            <ProfileVotes
+              navigationParams={navigationParams}
+              navigation={this.props.navigation}
+              refreshing={this.state.refreshing}
+              page={this.state.page}
+              setFinished={() => {this.setState({finished: true})}}
+            />
             :
-            <ProfileFeed navigationParams={navigationParams} navigation={this.props.navigation} refreshing={this.state.refreshing} />
+            <ProfileFeed
+              navigationParams={navigationParams}
+              navigation={this.props.navigation}
+              refreshing={this.state.refreshing}
+              page={this.state.page}
+              setFinished={() => {this.setState({finished: true})}}
+            />
           }
         </ScrollView>
       )

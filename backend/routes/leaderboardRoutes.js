@@ -87,7 +87,7 @@ module.exports = function(conn, loggedIn) {
       const start = req.params.page * 20
       conn.query('SELECT *, ' +
       '(SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) AS wins ' +
-      'FROM users ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
+      'FROM users WHERE (SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) > 0 ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -99,7 +99,8 @@ module.exports = function(conn, loggedIn) {
     leaderboardRoutes.get('/allTime/page=:page', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/leaderboard/allTime/page=' + req.params.page);
       const start = req.params.page * 20
-      conn.query('SELECT *, (SELECT SUM(wins) FROM posts WHERE userId = users.userId GROUP BY userId) AS wins FROM users ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
+      conn.query('SELECT *, (SELECT SUM(wins) FROM posts WHERE userId = users.userId GROUP BY userId) AS wins ' +
+      'FROM users WHERE (SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) > 0 ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {

@@ -1,21 +1,47 @@
 import React from 'react';
-import { Dimensions, SafeAreaView, View, Text, TextInput, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import { KeyboardAvoidingView, View, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import { loggedIn } from '../../redux/actions/index.actions.js'
 import { clearCookies, setCookie } from '../../Storage'
 import LinearGradient from 'react-native-linear-gradient'
+import backIcon from '../../icons/back-icon.png'
 
 export default class Login extends React.Component {
   constructor(props) {
     super(props);
+    this.transformValue = new Animated.Value(0)
     this.state = {
       email: '',
-      password: ''
+      password: '',
+      submitted: false
     };
 
+    this.handleAnimation = this.handleAnimation.bind(this)
     this.login = this.login.bind(this)
   }
 
+  handleAnimation(index) {
+    console.log(index);
+    if (index < 8) {
+      Animated.timing(
+        this.transformValue,
+        {
+          toValue: index % 2 == 0 ? -10 : 10,
+          duration: 100
+        }
+      ).start(() => this.handleAnimation(index + 1))
+    } else {
+      Animated.timing(
+        this.transformValue,
+        {
+          toValue: 0,
+          duration: 60
+        }
+      ).start()
+    }
+  }
+
   login(e) {
+    this.setState({submitted: true})
     clearCookies().then(data => {
       if (data.message === 'success') {
         fetch(global.API_URL + '/api/auth/signin', {
@@ -31,7 +57,7 @@ export default class Login extends React.Component {
         })
         .then(res => {
           console.log(res);
-          if (res.status === 401) {
+          if (res.status === 400 || res.status === 401) {
             return {message: 'not logged in'}
           } else if (res.headers.get("set-cookie")) {
             console.log("set cookie is", res.headers.get("set-cookie"));
@@ -51,8 +77,11 @@ export default class Login extends React.Component {
         })
         .then(data => {
           if (data.message === 'not logged in') {
-            this.props.dispatch(loggedIn(false))
+            this.setState({submitted: false})
+            this.handleAnimation(0)
+            // this.props.dispatch(loggedIn(false))
           } else {
+            this.setState({submitted: false})
             this.props.dispatch(loggedIn(true))
             this.props.navigation.navigate('Tabs')
           }
@@ -71,38 +100,45 @@ export default class Login extends React.Component {
 
   render() {
     return (
-      <View style={{flex: 1}}>
-        <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
-          <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 40}} onPress={() => this.props.navigation.navigate('Tabs')}>
-            <Text style={{color: 'white', fontSize: 18}}>Back</Text>
-          </TouchableOpacity>
-          <View style={styles.titleView}>
-            <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>Welcome Back</Text>
-          </View>
-          <View style={styles.inputView}>
-            <Text style={styles.inputLabel}>Email</Text>
-            <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
-            <Text style={styles.inputLabel}>Password</Text>
-            <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({password: text})}/>
-            <TouchableOpacity>
-              <Text style={{color: 'white', textAlign: 'right', marginVertical: 20}}>Forgot password?</Text>
+      <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1}}>
+        <ScrollView>
+          <KeyboardAvoidingView behavior="position">
+            <TouchableOpacity style={{paddingHorizontal: 30, marginTop: 40}} onPress={() => this.props.navigation.navigate('Tabs')}>
+              <Image source={backIcon} style={{width: 30, height: 30}} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={this.login}>
-              <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']} style={{alignItems: 'center', borderRadius: 4}}>
-                <Text style={styles.loginButtonText}>Sign in</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
-              <Text style={{color: 'white', marginRight: 5}}>Don't have an account?</Text>
-              <TouchableOpacity onPress={() => this.props.navigation.navigate('Signup')}>
-                <View style={{borderBottomWidth: 1, borderColor: 'white'}}>
-                  <Text style={{color: 'white'}}>Sign up here!</Text>
-                </View>
-              </TouchableOpacity>
+            <View style={styles.titleView}>
+              <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>Welcome to Fit Battles</Text>
             </View>
-          </View>
-        </LinearGradient>
-      </View>
+            <View style={styles.inputView}>
+                <Text style={styles.inputLabel}>Email</Text>
+              <Animated.View style={{transform: [{translateX: this.transformValue}]}}>
+                <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({email: text})}/>
+              </Animated.View>
+              <Text style={styles.inputLabel}>Password</Text>
+              <Animated.View style={{transform: [{translateX: this.transformValue}]}}>
+                <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({password: text})}/>
+              </Animated.View>
+              {/* <TouchableOpacity>
+                <Text style={{color: 'white', textAlign: 'right', marginVertical: 20}}>Forgot password?</Text>
+              </TouchableOpacity> */}
+              <TouchableOpacity onPress={this.login} disabled={this.state.submitted}>
+                <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']}
+                  style={{alignItems: 'center', borderRadius: 4, marginVertical: 30}}>
+                  <Text style={styles.loginButtonText}>Sign in</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>
+                <Text style={{color: 'white', marginRight: 5}}>Don't have an account?</Text>
+                <TouchableOpacity onPress={() => this.props.navigation.navigate('Signup')}>
+                  <View style={{borderBottomWidth: 1, borderColor: 'white'}}>
+                    <Text style={{color: 'white'}}>Sign up here!</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </ScrollView>
+      </LinearGradient>
     );
   }
 }

@@ -10,15 +10,15 @@ module.exports = function(conn, loggedIn) {
       }
 
       if (userId) {
-        conn.query('SELECT a.*, b.location, b.followers, ' +
-        '((SELECT COUNT(*) FROM following WHERE followingUserId = a.userId AND followerUserId = :userId) > 0) AS following, ' +
-        '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = a.userId) > 0) AS followsYou, ' +
+        conn.query('SELECT a.*, b.location, ' +
+        // '((SELECT COUNT(*) FROM following WHERE followingUserId = a.userId AND followerUserId = :userId) > 0) AS following, ' +
+        // '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = a.userId) > 0) AS followsYou, ' +
         '(a.userId = :userId) AS isPoster, '  +
         '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
         'FROM posts AS a ' +
         'JOIN users AS b ON b.userId = a.userId ' +
-        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() AND a.mediaId NOT IN (SELECT winMediaId FROM votes WHERE userId = :userId UNION ALL SELECT lossMediaId FROM votes WHERE userId = :userId) ' +
-        'ORDER BY NOW() - a.dateTime ASC LIMIT 20', {userId: userId}, function(err, result) {
+        'WHERE a.dateTime >= CURRENT_DATE() AND a.mediaId NOT IN (SELECT lossMediaId FROM votes WHERE userId = :userId) ' +
+        'ORDER BY a.dateTime DESC LIMIT 20', {userId: userId}, function(err, result) {
           if (err) {
             console.log(err);
             res.send({message: 'error'})

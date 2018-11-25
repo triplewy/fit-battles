@@ -3,7 +3,7 @@ module.exports = function(conn) {
 
     var bcrypt = require('bcrypt')
 
-    conn.query('INSERT INTO users (profileName, location, about) VALUES (?, ?, ?)', ['YUSHUF', 'Boston', 'Yuh'], function(err, result) {
+    conn.query('INSERT INTO users (profileName, location) VALUES (?, ?)', ['YUSHUF', 'Boston'], function(err, result) {
       if (err) {
         console.log(err);
       } else {
@@ -11,7 +11,7 @@ module.exports = function(conn) {
       }
     })
 
-    conn.query('INSERT INTO users (profileName, location, about) VALUES (?, ?, ?)', ['CYANURA', 'Vancouver', 'yeah'], function(err, result) {
+    conn.query('INSERT INTO users (profileName, location) VALUES (?, ?)', ['CYANURA', 'Vancouver'], function(err, result) {
       if (err) {
         console.log(err);
       } else {
@@ -30,7 +30,7 @@ module.exports = function(conn) {
       })
     })
 
-    conn.query('INSERT INTO posts (userId, imageUrl) VALUES (?, ?)', [1, 'https://s3.us-east-2.amazonaws.com/drip.io-images/026bb3d0-c8ec-11e8-9709-7d3cd8d2ea97.jpg'], function(err, result) {
+    conn.query('INSERT INTO posts (userId, imageUrl, dateTime) VALUES (?, ?, ?)', [1, 'https://s3.us-east-2.amazonaws.com/drip.io-images/026bb3d0-c8ec-11e8-9709-7d3cd8d2ea97.jpg', '2018-11-24 09:00:00'], function(err, result) {
       if (err) {
         console.log(err);
       } else {

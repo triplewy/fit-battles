@@ -1,11 +1,11 @@
 import React from 'react';
-import { Dimensions, SafeAreaView, ScrollView, RefreshControl, View, Text, StyleSheet, Image, TouchableOpacity, TouchableHighlight } from 'react-native';
+import { Dimensions, SafeAreaView, ScrollView, RefreshControl, View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { lastVisit } from '../../Storage'
 import Card from './Card'
 import FeedCard from '../feed/FeedCard'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import LinearGradient from 'react-native-linear-gradient'
-import BattlesModal from './BattlesModal'
+import WinnersModal from './WinnersModal'
 
 export default class Battles extends React.Component {
   constructor(props) {
@@ -20,7 +20,7 @@ export default class Battles extends React.Component {
       showModal: false
     };
 
-    this.fetchLastVisit = this.fetchLastVisit.bind(this)
+    this.refreshBattles = this.refreshBattles.bind(this)
     this.fetchBattles = this.fetchBattles.bind(this)
     this.renderItem = this.renderItem.bind(this)
     this.handleVote = this.handleVote.bind(this)
@@ -30,16 +30,27 @@ export default class Battles extends React.Component {
     this.fetchBattles()
   }
 
-  fetchLastVisit() {
-    lastVisit().then(data => {
-      if (!data.lastVisitToday) {
-        this.setState({showModal: true})
-      }
+  refreshBattles() {
+    this.setState({refreshing: true}, () => {
+      fetch(global.API_URL + '/api/battles', {
+        credentials: 'include'
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+        if (data.length > 0) {
+          this.setState({battleData: data, currentBattle: 0, endOfBattles: false, refreshing: false})
+        } else {
+          this.setState({endOfBattles: true, refreshing: false})
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      })
     })
   }
 
   fetchBattles() {
-    this.setState({refreshing: true})
     fetch(global.API_URL + '/api/battles', {
       credentials: 'include'
     })
@@ -47,9 +58,9 @@ export default class Battles extends React.Component {
     .then(data => {
       console.log(data);
       if (data.length > 0) {
-        this.setState({battleData: data, currentBattle: 0, refreshing: false})
+        this.setState({battleData: data, currentBattle: 0, endOfBattles: false, activeSlide: 0})
       } else {
-        this.setState({endOfBattles: true, refreshing: false})
+        this.setState({endOfBattles: true})
       }
     })
     .catch((error) => {
@@ -60,7 +71,7 @@ export default class Battles extends React.Component {
   renderItem ({item, index}) {
     return (
       <View style={{alignItems: 'center'}}>
-        <Card {...item} index={index} handleVote={this.handleVote} navigation={this.props.navigation}/>
+        <Card {...item} index={index} handleVote={this.handleVote} navigation={this.props.navigation} />
       </View>
     )
   }
@@ -119,12 +130,13 @@ export default class Battles extends React.Component {
        <Pagination
          dotsLength={battleData[currentBattle].length}
          activeDotIndex={activeSlide}
-         containerStyle={{ backgroundColor: 'transparent', paddingVertical: 10}}
+         containerStyle={{ backgroundColor: 'transparent'}}
          dotStyle={{
              width: 8,
              height: 8,
              borderRadius: 5,
              marginHorizontal: 2,
+             marginVertical: 5,
              backgroundColor: '#739aff'
          }}
          inactiveDotStyle={{
@@ -143,15 +155,17 @@ export default class Battles extends React.Component {
     if (this.state.endOfBattles) {
       return (
         <ScrollView
-          style={{paddingTop: 30}}
           refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
-              onRefresh={this.fetchBattles.bind(this)}
+              onRefresh={this.refreshBattles.bind(this)}
             />
           }
           >
-          <Text style={{textAlign: 'center', marginTop: 300}}>You have no more battles left</Text>
+            <View style={{marginTop: 200, justifyContent: 'center', alignItems: 'center'}}>
+              <Text style={{marginBottom: 10, fontSize: 16, color: '#739aff'}}>You have no more battles left.</Text>
+              <Text style={{fontSize: 16, color: '#739aff'}}>Swipe down to see if you have more!</Text>
+            </View>
         </ScrollView>
       )
     } else {
@@ -166,7 +180,7 @@ export default class Battles extends React.Component {
               />
             }
           >
-              {/* <BattlesModal {...this.props} /> */}
+              <WinnersModal {...this.props} />
               <Carousel
                 ref={(c) => { this.carousel = c }}
                 data={this.state.battleData[this.state.currentBattle]}
@@ -181,10 +195,9 @@ export default class Battles extends React.Component {
         )
       } else {
         return (
-          <SafeAreaView>
-            {/* <BattlesModal {...this.props} /> */}
-            <Text style={{textAlign: 'center', marginTop: 300}}>Loading</Text>
-          </SafeAreaView>
+          <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <ActivityIndicator size='large' color='#739aff' animating />
+          </View>
         )
       }
     }

@@ -31,9 +31,8 @@ export default class Upload extends React.Component {
         // You can also display the image using data:
         // const source = { uri: 'data:image/jpeg;base64,' + response.data };
         const win = Dimensions.get('window');
-        this.setState({animating: false})
         console.log("here1");
-        this.props.navigation.navigate('SelectedPhoto', {uri: response.uri})
+        // this.props.navigation.navigate('SelectedPhoto', {uri: response.uri})
 
         ImageResizer.createResizedImage(response.uri, 1080, 1080 * 4 / 3, 'JPEG', 75).then((response) => {
           // response.uri is the URI of the new image that can now be displayed, uploaded...
@@ -41,6 +40,7 @@ export default class Upload extends React.Component {
           // response.name is the name of the new image with the extension
           // response.size is the size of the new image
           console.log("here2");
+          this.setState({animating: false})
           this.props.navigation.navigate('SelectedPhoto', {uri: response.uri})
         }).catch((err) => {
           // Oops, something went wrong. Check that the filename is correct and
@@ -57,8 +57,8 @@ export default class Upload extends React.Component {
     if (this.props.state.auth) {
       return (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <TouchableOpacity onPress={this.addImage.bind(this)}>
-            <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{borderRadius: 8, marginBottom: 20}}>
+          <TouchableOpacity onPress={this.addImage.bind(this)} disabled={this.state.animating}>
+            <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={this.state.animating ? ['#D3D3D3', '#D3D3D3'] : ['#54d7ff', '#739aff']} style={{borderRadius: 8, marginBottom: 20}}>
               <Text style={{fontSize: 18, color: 'white', paddingVertical: 20, paddingHorizontal: 30}}>Select Photo</Text>
             </LinearGradient>
           </TouchableOpacity>

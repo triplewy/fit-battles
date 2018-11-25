@@ -1,59 +1,62 @@
 import React from 'react';
 import { Dimensions, View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, Animated, Easing } from 'react-native';
-import DoubleTap from '../DoubleTap'
 import { follow, unfollow } from '../Follow'
 import { formatDate } from '../Date'
+import DoubleTap from '../DoubleTap'
+import votedIcon from '../../icons/voted-icon.png'
 
 export default class Card extends React.Component {
   constructor(props) {
     super(props);
     this.fadeValue = new Animated.Value(0)
     this.state = {
-      following: this.props.following,
+      wins: this.props.wins,
+      matches: this.props.matches,
       voted: false
     }
 
-    this.cardFollow = this.cardFollow.bind(this)
-    this.cardUnfollow = this.cardUnfollow.bind(this)
+    // this.cardFollow = this.cardFollow.bind(this)
+    // this.cardUnfollow = this.cardUnfollow.bind(this)
     this.handleFadeAnimation = this.handleFadeAnimation.bind(this)
     this.handleVote = this.handleVote.bind(this)
   }
 
-  cardFollow(userId) {
-    follow(userId)
-    .then(message => {
-      if (message === 'success') {
-        this.setState({following: true})
-      } else {
-        console.log(message);
-      }
-    })
-    .catch(e => {
-      console.log(e);
-    })
-  }
-
-  cardUnfollow(userId) {
-    unfollow(userId)
-    .then(message => {
-      if (message === 'success') {
-        this.setState({following: false})
-      } else {
-        console.log(message);
-      }
-    })
-    .catch(e => {
-      console.log(e);
-    })
-  }
+  // cardFollow(userId) {
+  //   follow(userId)
+  //   .then(message => {
+  //     if (message === 'success') {
+  //       this.setState({following: true})
+  //     } else {
+  //       console.log(message);
+  //     }
+  //   })
+  //   .catch(e => {
+  //     console.log(e);
+  //   })
+  // }
+  //
+  // cardUnfollow(userId) {
+  //   unfollow(userId)
+  //   .then(message => {
+  //     if (message === 'success') {
+  //       this.setState({following: false})
+  //     } else {
+  //       console.log(message);
+  //     }
+  //   })
+  //   .catch(e => {
+  //     console.log(e);
+  //   })
+  // }
 
   handleFadeAnimation() {
     this.fadeValue.setValue(0)
+    this.setState({wins: this.state.wins + 1, matches: this.state.matches + 1, voted: true})
     Animated.timing(
       this.fadeValue,
       {
         toValue: 1,
-        duration: 1000,
+        duration: 800,
         easing: Easing.ease
       }
     ).start(() => this.handleVote())
@@ -65,22 +68,25 @@ export default class Card extends React.Component {
         this.fadeValue,
         {
           toValue: 0,
-          duration: 1000,
+          duration: 800,
           easing: Easing.ease
         }
-      ).start(() => this.props.handleVote(this.props.index))
+      ).start(() => {
+        this.setState({voted: false})
+        this.props.handleVote(this.props.index)
+      })
     }, 500)
   }
 
   render() {
     const win = Dimensions.get('window');
     return (
-      <View style={{backgroundColor: 'white', borderRadius: 8, margin: 10, width: win.width - 60, justifyContent: 'center'}}>
+      <View style={{backgroundColor: 'white', borderRadius: 8, marginTop: 10, width: win.width - 60, justifyContent: 'center'}}>
         <DoubleTap onDoubleTap={this.handleFadeAnimation}>
           <View style={{alignItems: 'center'}}>
-            <Animated.View style={{position: 'absolute', opacity: this.fadeValue, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 8,
+            <Animated.View style={{position: 'absolute', opacity: this.fadeValue, borderRadius: 8,
               top: 0, left: 0, zIndex: 2, height: (win.width - 60) * (4.0 / 3), width: win.width - 60, alignItems: 'center', justifyContent: 'center'}}>
-              <Text style={{fontSize: 32, fontWeight: 'bold', color: '#7DD497'}}>Voted</Text>
+              <Image source={votedIcon} style={{width: 200, height: 200}} />
             </Animated.View>
             <ImageBackground
               resizeMode={'contain'}
@@ -96,19 +102,16 @@ export default class Card extends React.Component {
             <TouchableOpacity style={{flex: 1}} onPress={() => this.props.navigation.navigate('UserProfile', {userId: this.props.userId})}>
               <Text style={{fontWeight: '600', fontSize: 18}}>{this.props.profileName}</Text>
             </TouchableOpacity>
-            <Text style={{fontWeight: '600', fontSize: 18, color: this.props.wins / this.props.matches >= 0.5 ? '#9FDD9A' : 'red'}}>{this.props.matches ? Math.round(this.props.wins * 1.0 / this.props.matches * 100) + '%' : 0 + '%'}</Text>
-            {/* <Text>{formatDate(this.props.dateTime)}</Text> */}
+            <Text style={{fontWeight: '600', fontSize: 18, color: this.state.wins / this.state.matches >= 0.5 ? '#9FDD9A' : 'red'}}>
+              {this.state.matches ? Math.round(this.state.wins * 1.0 / this.state.matches * 100) + '%' : 0 + '%'}
+            </Text>
           </View>
-          <Text style={{color: '#66757f'}}>{this.props.location}</Text>
-          {/* {this.props.isPoster ?
-            <TouchableOpacity onPress={this.showAlert}>
-              <Text>More</Text>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{color: '#66757f', flex: 1}}>{this.props.location}</Text>
+            <TouchableOpacity onPress={this.handleFadeAnimation} disabled={this.state.voted}>
+              <Text style={{color: '#739aff'}}>Vote</Text>
             </TouchableOpacity>
-            :
-            <TouchableOpacity onPress={this.state.following ? this.cardUnfollow.bind(this, this.props.userId) : this.cardFollow.bind(this, this.props.userId)}>
-              <Text>{this.state.following ? 'Unfollow' : this.props.followsYou ? 'Follow Back' : 'Follow'}</Text>
-            </TouchableOpacity>
-          } */}
+          </View>
         </View>
       </View>
     )

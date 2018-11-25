@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient'
 
 export default class Edit extends React.Component {
@@ -74,8 +74,13 @@ export default class Edit extends React.Component {
     .then(res => res.json())
     .then(data => {
       if (data.message === "success") {
-        this.props.navigation.state.params.refresh()
-        this.props.navigation.goBack()
+        Alert.alert(
+          'Edited successfully',
+          'Refresh profile to see changes',
+          [
+            {text: 'OK', onPress: () => this.props.navigation.goBack()}
+          ]
+        )
       } else {
         console.log(data.message);
       }
