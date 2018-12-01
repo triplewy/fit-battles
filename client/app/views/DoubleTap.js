@@ -11,7 +11,7 @@ export default class DoubleTap extends React.Component {
 
   handleDoubleTap = () => {
     const now = Date.now();
-    if (this.lastTap && (now - this.lastTap) < this.props.delay) {
+    if (this.lastTap && (now - this.lastTap) < this.props.delay && !this.props.voted) {
       this.props.onDoubleTap();
     } else {
       this.lastTap = now;

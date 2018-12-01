@@ -1,5 +1,5 @@
 import React from 'react';
-import { KeyboardAvoidingView, View, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
+import { KeyboardAvoidingView, View, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, Image, Animated, ActivityIndicator } from 'react-native';
 import { loggedIn } from '../../redux/actions/index.actions.js'
 import { clearCookies, setCookie } from '../../Storage'
 import LinearGradient from 'react-native-linear-gradient'
@@ -124,7 +124,11 @@ export default class Login extends React.Component {
               <TouchableOpacity onPress={this.login} disabled={this.state.submitted}>
                 <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']}
                   style={{alignItems: 'center', borderRadius: 4, marginVertical: 30}}>
+                  {this.state.submitted ?
+                  <ActivityIndicator style={styles.loginButtonText} size="small" color="white" animating />
+                  :
                   <Text style={styles.loginButtonText}>Sign in</Text>
+                  }
                 </LinearGradient>
               </TouchableOpacity>
               <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center'}}>

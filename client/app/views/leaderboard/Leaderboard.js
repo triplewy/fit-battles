@@ -32,6 +32,21 @@ export default class Leaderboard extends React.Component {
     .then(res => res.json())
     .then(data => {
       console.log(data);
+      if (this.props.API_URL !== '/api/leaderboard/daily') {
+        console.log('here');
+        if (data.length > 0) {
+          var wins = data[0].wins
+          var rank = 1;
+          for (var i = 0; i < data.length; i++) {
+            var intWins = data[i].wins * 1
+            if (intWins <  wins) {
+              wins = intWins
+              rank++
+            }
+            data[i].rank = rank
+          }
+        }
+      }
       this.setState({leaderboard: data, refreshing: false, finished: data.length < this.props.dataLength})
     })
     .catch((error) => {
@@ -45,7 +60,23 @@ export default class Leaderboard extends React.Component {
     })
     .then(res => res.json())
     .then(data => {
-      this.setState({leaderboard: this.state.leaderboard.concat(data), updating: false, finished: data.length < this.props.dataLength})
+      console.log(data);
+      var newData = this.state.leaderboard.concat(data)
+      if (this.props.API_URL !== '/api/leaderboard/daily') {
+        if (newData.length > 0) {
+          var wins = data[0].wins
+          var rank = 1;
+          for (var i = 0; i < newData.length; i++) {
+            var intWins = newData[i].wins * 1
+            if (intWins <  wins) {
+              wins = intWins
+              rank++
+            }
+            newData[i].rank = rank
+          }
+        }
+      }
+      this.setState({leaderboard: newData, updating: false, finished: data.length < this.props.dataLength})
     })
     .catch((error) => {
       console.error(error);

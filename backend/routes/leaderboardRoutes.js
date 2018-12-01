@@ -71,8 +71,8 @@ module.exports = function(conn, loggedIn) {
     leaderboardRoutes.get('/daily/page=:page', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/leaderboard/daily/page=' + req.params.page);
       const start = req.params.page * 10
-      conn.query('SELECT a.*, ' +
-      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
+      conn.query('SELECT a.*, true AS postedToday, ' +
+      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (CASE WHEN a.matches = 0 THEN 0 ELSE a.wins * 1.0 / a.matches END)) AS dailyRank ' +
       'FROM posts AS a WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY a.wins * 1.0 / a.matches DESC LIMIT ' + start + ', 10', [], function(err, result) {
         if (err) {
           console.log(err);
@@ -87,7 +87,7 @@ module.exports = function(conn, loggedIn) {
       const start = req.params.page * 20
       conn.query('SELECT *, ' +
       '(SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) AS wins ' +
-      'FROM users WHERE (SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) > 0 ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
+      'FROM users WHERE userId IN (SELECT userId FROM posts WHERE YEARWEEK(dateTime) = YEARWEEK(NOW())) ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -100,7 +100,7 @@ module.exports = function(conn, loggedIn) {
       console.log('- Request received:', req.method.cyan, '/api/leaderboard/allTime/page=' + req.params.page);
       const start = req.params.page * 20
       conn.query('SELECT *, (SELECT SUM(wins) FROM posts WHERE userId = users.userId GROUP BY userId) AS wins ' +
-      'FROM users WHERE (SELECT SUM(wins) FROM posts WHERE userId = users.userId AND YEARWEEK(dateTime) = YEARWEEK(NOW()) GROUP BY userId) > 0 ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
+      'FROM users WHERE userId IN (SELECT userId FROM posts) ORDER BY wins DESC LIMIT ' + start + ', 20', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {

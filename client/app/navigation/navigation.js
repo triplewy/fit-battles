@@ -91,7 +91,7 @@ export default class TabNavigator extends React.Component {
     const BattleNavigation = createStackNavigator(
       {
         Battle: {
-          screen: Battles,
+          screen: props => <Battles {...props} {...this.props} />,
           navigationOptions: ({ navigation }) => ({
             title: 'Battle',
             headerRight: (
@@ -358,7 +358,10 @@ export default class TabNavigator extends React.Component {
 
     if (this.state.loading) {
       return (
-        <Loading />
+        <View style={{flex: 1}}>
+          <StatusBar barStyle="light-content" />
+          <Loading />
+        </View>
       )
     } else {
       if (this.state.animationEnded) {
@@ -370,7 +373,10 @@ export default class TabNavigator extends React.Component {
         )
       } else {
         return (
-          <Splash setAnimationEnded={this.setAnimationEnded}/>
+          <View style={{flex: 1}}>
+            <StatusBar barStyle="light-content" />
+            <Splash setAnimationEnded={this.setAnimationEnded}/>
+          </View>
         )
       }
     }

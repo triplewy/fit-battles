@@ -18,7 +18,7 @@ export default class LeaderboardUser extends React.PureComponent {
       <TouchableOpacity onPress={() => this.props.navigation.navigate('UserProfile', {userId: user.userId})}>
         <View style={{flex: 1, flexDirection: 'row', height: 60, padding: 10, backgroundColor: 'white', marginTop: 2}}>
           <View style={{marginRight: 20, justifyContent: 'center'}}>
-            <Text style={{fontWeight: 'bold', color: '#739aff'}}>{this.props.index + 1}</Text>
+            <Text style={{fontWeight: 'bold', color: '#739aff', marginLeft: 5}}>{this.props.rank}</Text>
           </View>
           <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}>
             <Text>{user.profileName}</Text>

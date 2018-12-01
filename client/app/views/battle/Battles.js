@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dimensions, SafeAreaView, ScrollView, RefreshControl, View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { lastVisit } from '../../Storage'
+import { lastVisit, getLatestDate, storeLatestDate } from '../../Storage'
 import Card from './Card'
 import FeedCard from '../feed/FeedCard'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
@@ -22,6 +22,7 @@ export default class Battles extends React.Component {
 
     this.refreshBattles = this.refreshBattles.bind(this)
     this.fetchBattles = this.fetchBattles.bind(this)
+    this.fetchBattlesHelper = this.fetchBattlesHelper.bind(this)
     this.renderItem = this.renderItem.bind(this)
     this.handleVote = this.handleVote.bind(this)
   }
@@ -32,26 +33,70 @@ export default class Battles extends React.Component {
 
   refreshBattles() {
     this.setState({refreshing: true}, () => {
-      fetch(global.API_URL + '/api/battles', {
-        credentials: 'include'
-      })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data);
-        if (data.length > 0) {
-          this.setState({battleData: data, currentBattle: 0, endOfBattles: false, refreshing: false})
-        } else {
-          this.setState({endOfBattles: true, refreshing: false})
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      })
+      if (this.props.state.auth) {
+        fetch(global.API_URL + '/api/battles', {
+          credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+          console.log(data);
+          if (data.length > 0) {
+            this.setState({battleData: data, currentBattle: 0, endOfBattles: false, refreshing: false})
+          } else {
+            this.setState({endOfBattles: true, refreshing: false})
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+      } else {
+        getLatestDate().then(dateTime => {
+          var datetimeQuery = ''
+          if (dateTime) {
+            datetimeQuery += '/' + dateTime
+          }
+          fetch(global.API_URL + '/api/battles' + datetimeQuery, {
+            credentials: 'include'
+          })
+          .then(res => res.json())
+          .then(data => {
+            console.log(data);
+            if (data.length > 0) {
+              this.setState({battleData: data, currentBattle: 0, endOfBattles: false, activeSlide: 0, refreshing: false})
+            } else {
+              this.setState({endOfBattles: true, refreshing: false})
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          })
+        })
+        .catch(err => {
+          console.log(err);
+        })
+      }
     })
   }
 
   fetchBattles() {
-    fetch(global.API_URL + '/api/battles', {
+    if (this.props.state.auth) {
+      this.fetchBattlesHelper('')
+    } else {
+      getLatestDate().then(dateTime => {
+        var datetimeQuery = ''
+        if (dateTime) {
+          datetimeQuery += '/' + dateTime
+        }
+        this.fetchBattlesHelper(datetimeQuery)
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    }
+  }
+
+  fetchBattlesHelper(datetimeQuery) {
+    fetch(global.API_URL + '/api/battles' + datetimeQuery, {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -65,13 +110,13 @@ export default class Battles extends React.Component {
     })
     .catch((error) => {
       console.error(error);
-    });
+    })
   }
 
   renderItem ({item, index}) {
     return (
       <View style={{alignItems: 'center'}}>
-        <Card {...item} index={index} handleVote={this.handleVote} navigation={this.props.navigation} />
+        <Card {...item} index={index} handleVote={this.handleVote} navigation={this.props.navigation} key={item.mediaId} />
       </View>
     )
   }
@@ -112,6 +157,7 @@ export default class Battles extends React.Component {
     })
     .then(res => res.json())
     .then(data => {
+      storeLatestDate(currentBattle[1].dateTime)
       if (this.state.currentBattle === this.state.battleData.length - 1) {
         this.fetchBattles()
       } else {

@@ -10,7 +10,7 @@ export default class Edit extends React.Component {
 
     this.state = {
       profileName: '',
-      profileNameAvailable: false,
+      profileMessage: '',
       location: '',
     };
 
@@ -59,6 +59,7 @@ export default class Edit extends React.Component {
   }
 
   save() {
+    this.setState({profileMessage: ''})
     fetch(global.API_URL + '/api/profile/edit', {
       method: 'POST',
       headers: {
@@ -82,7 +83,7 @@ export default class Edit extends React.Component {
           ]
         )
       } else {
-        console.log(data.message);
+        this.setState({profileMessage: 'Name taken'})
       }
     })
     .catch(function(err) {
@@ -93,9 +94,14 @@ export default class Edit extends React.Component {
   render() {
     return (
       <View style={styles.inputView}>
-        <Text style={styles.inputLabel}>Profile name</Text>
+        <View style={{flexDirection: 'row', marginTop: 20, marginBottom: 10}}>
+          <Text style={styles.inputLabel}>Profile name</Text>
+          <Text style={{fontSize: 16, color: 'red'}}>{this.state.profileMessage}</Text>
+        </View>
         <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.profileName} onChangeText={(text) => this.setState({profileName: text})}/>
-        <Text style={styles.inputLabel}>Location</Text>
+        <View style={{flexDirection: 'row', marginTop: 20, marginBottom: 10}}>
+          <Text style={styles.inputLabel}>Location</Text>
+        </View>
         <TextInput autoCapitalize='none' autoCorrect={false} style={styles.textInput} value={this.state.location} onChangeText={(text) => this.setState({location: text})}/>
         <TouchableOpacity onPress={this.save.bind(this)}>
           <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#54d7ff', '#739aff']} style={{marginTop: 30, alignItems: 'center', borderRadius: 4}}>
@@ -117,8 +123,7 @@ const styles = StyleSheet.create({
     padding: 30
   },
   inputLabel: {
-    marginTop: 20,
-    marginBottom: 10,
+    flex: 1,
     fontSize: 16,
     fontWeight: '500'
   },

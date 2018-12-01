@@ -137,10 +137,11 @@ export default class FeedCard extends React.PureComponent {
             imageStyle={{borderRadius: 8, shadowOffset:{height: 10}, shadowColor: 'black', shadowOpacity: 0.75}}
           >
             <LinearGradient
-              colors={['#54d7ff', '#739aff']}
-              style={{position: 'absolute', right: -12, top: -12, width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center'}}
+              colors={this.props.postedToday ? ['#54d7ff', '#739aff'] : ['#ccc', '#ccc']}
+              style={{position: 'absolute', right: -12, top: -12, width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', flexDirection: 'row'}}
             >
-              <Text style={{fontSize: 18, fontWeight: '600', color: 'white'}}>{this.props.dailyRank + 1}</Text>
+              <Text style={{fontSize: 16, fontWeight: '300', color: 'white'}}>#</Text>
+              <Text style={{fontSize: 16, fontWeight: '600', color: 'white'}}>{this.props.dailyRank + 1}</Text>
             </LinearGradient>
           </ImageBackground>
         {/* </DoubleTap> */}

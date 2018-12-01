@@ -82,7 +82,7 @@ export default class Card extends React.Component {
     const win = Dimensions.get('window');
     return (
       <View style={{backgroundColor: 'white', borderRadius: 8, marginTop: 10, width: win.width - 60, justifyContent: 'center'}}>
-        <DoubleTap onDoubleTap={this.handleFadeAnimation}>
+        <DoubleTap onDoubleTap={this.handleFadeAnimation} voted={this.state.voted}>
           <View style={{alignItems: 'center'}}>
             <Animated.View style={{position: 'absolute', opacity: this.fadeValue, borderRadius: 8,
               top: 0, left: 0, zIndex: 2, height: (win.width - 60) * (4.0 / 3), width: win.width - 60, alignItems: 'center', justifyContent: 'center'}}>

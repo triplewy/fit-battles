@@ -36,9 +36,9 @@ module.exports = function(conn, loggedIn) {
       console.log('- Request received:', req.method.cyan, '/api/profile/feed/page=' + req.params.page);
       const userId = req.user
       const start = req.params.page * 10
-      conn.query('SELECT a.*, true AS isPoster, ' +
-      '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
-      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = a.mediaId LIMIT 1)) AS dailyRank ' +
+      conn.query('SELECT a.*, true AS isPoster, DAY(a.dateTime) = DAY(NOW()) AS postedToday, ' +
+      // '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
+      '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(a.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN a.matches = 0 THEN 0 ELSE a.wins * 1.0 / a.matches END)) AS dailyRank ' +
       'FROM posts AS a WHERE a.userId = :userId ORDER BY a.dateTime DESC LIMIT ' + start + ', 10', {userId: userId}, function(err, result) {
         if (err) {
           console.log(err);
@@ -56,9 +56,9 @@ module.exports = function(conn, loggedIn) {
       }
       const profileId = req.params.userId
       const start = req.params.page * 10
-      conn.query('SELECT a.*, a.userId = :userId AS isPoster, ' +
-      '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
-      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = a.mediaId LIMIT 1)) AS dailyRank ' +
+      conn.query('SELECT a.*, a.userId = :userId AS isPoster, DAY(a.dateTime) = DAY(NOW()) AS postedToday, ' +
+      // '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
+      '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(a.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN a.matches = 0 THEN 0 ELSE a.wins * 1.0 / a.matches END)) AS dailyRank ' +
       'FROM posts AS a WHERE a.userId = :profileId ORDER BY a.dateTime DESC LIMIT ' + start + ', 10', {userId: userId, profileId: profileId}, function(err, result) {
         if (err) {
           console.log(err);
@@ -71,9 +71,9 @@ module.exports = function(conn, loggedIn) {
     profileRoutes.get('/votes', loggedIn, (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/profile/votes');
       const userId = req.user
-      conn.query('SELECT b.*, true AS voted, ' +
-      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = b.mediaId LIMIT 1)) AS dailyRank ' +
-      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :userId ORDER BY dateTime DESC', {userId: userId}, function(err, result) {
+      conn.query('SELECT b.*, true AS voted, DAY(b.dateTime) = DAY(NOW()) AS postedToday, ' +
+      '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(b.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN b.matches = 0 THEN 0 ELSE b.wins * 1.0 / b.matches END)) AS dailyRank ' +
+      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :userId ORDER BY dateTime DESC LIMIT 10', {userId: userId}, function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -90,10 +90,10 @@ module.exports = function(conn, loggedIn) {
       }
       const profileId = req.params.userId
 
-      conn.query('SELECT b.*, ' +
-      '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.winMediaId OR lossMediaId = a.winMediaId)) > 0) AS voted, ' +
-      '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (SELECT (wins * 1.0 / matches) FROM posts WHERE mediaId = b.mediaId LIMIT 1)) AS dailyRank ' +
-      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :profileId ORDER BY dateTime DESC', {userId: userId, profileId: profileId}, function(err, result) {
+      conn.query('SELECT b.*, DAY(b.dateTime) = DAY(NOW()) AS postedToday, ' +
+      // '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.winMediaId OR lossMediaId = a.winMediaId)) > 0) AS voted, ' +
+      '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(b.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN b.matches = 0 THEN 0 ELSE b.wins * 1.0 / b.matches END)) AS dailyRank ' +
+      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :profileId ORDER BY dateTime DESC LIMIT 10', {userId: userId, profileId: profileId}, function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -165,10 +165,11 @@ module.exports = function(conn, loggedIn) {
     profileRoutes.post('/edit', loggedIn, (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/profile/edit');
       const userId = req.user
-      conn.query('UPDATE users SET profileName = :profileName, location = :location, about = :about WHERE userId = :userId',
-      {userId: userId, profileName: req.body.profileName, location: req.body.location, about: req.body.about}, function(err, result) {
+      conn.query('UPDATE users SET profileName = :profileName, location = :location WHERE userId = :userId',
+      {userId: userId, profileName: req.body.profileName, location: req.body.location}, function(err, result) {
         if (err) {
           console.log(err);
+          res.send({message: 'fail'})
         } else {
           if (result.affectedRows) {
             console.log("Edited successfully");

@@ -1,5 +1,5 @@
 import React from 'react';
-import { KeyboardAvoidingView, View, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { KeyboardAvoidingView, View, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { loggedIn } from '../../redux/actions/index.actions.js'
 import { clearCookies, setCookie } from '../../Storage'
 import LinearGradient from 'react-native-linear-gradient'
@@ -119,7 +119,11 @@ export default class Signup extends React.Component {
               <TextInput secureTextEntry autoCapitalize='none' autoCorrect={false} style={styles.textInput} onChangeText={(text) => this.setState({confirmPassword: text})}/>
               <TouchableOpacity onPress={this.signup} disabled={this.state.submitted}>
                 <LinearGradient start={{x: 0, y: 0}} end={{x: 1, y: 0}} colors={['#80e1ff', '#6770e3']} style={{alignItems: 'center', borderRadius: 4, marginTop: 30}}>
+                  {this.state.submitted ?
+                  <ActivityIndicator style={styles.loginButtonText} size="small" color="white" animating />
+                  :
                   <Text style={styles.loginButtonText}>Sign Up</Text>
+                  }
                 </LinearGradient>
               </TouchableOpacity>
             </View>

@@ -10,33 +10,46 @@ module.exports = function(conn, loggedIn) {
       }
 
       if (userId) {
-        conn.query('SELECT a.*, b.location, ' +
-        // '((SELECT COUNT(*) FROM following WHERE followingUserId = a.userId AND followerUserId = :userId) > 0) AS following, ' +
-        // '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = a.userId) > 0) AS followsYou, ' +
-        '(a.userId = :userId) AS isPoster, '  +
-        '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
-        'FROM posts AS a ' +
-        'JOIN users AS b ON b.userId = a.userId ' +
-        'WHERE a.dateTime >= CURRENT_DATE() AND a.mediaId NOT IN (SELECT lossMediaId FROM votes WHERE userId = :userId) ' +
-        'ORDER BY a.dateTime DESC LIMIT 20', {userId: userId}, function(err, result) {
-          if (err) {
-            console.log(err);
-            res.send({message: 'error'})
-          } else {
-            var length = result.length
-            if (length % 2 !== 0) {
-              length -= 1
-            }
-            var battleTuples = []
-            for (var i = 0; i + 1 < length; i += 2) {
-              battleTuples.push([result[i], result[i+1]])
-            }
-            res.send(battleTuples)
-          }
+        Promise.all([getAllPosts(), getVotedPairs(userId)]).then(allData => {
+          const allPairs = allData[0][0]
+          const possiblePairs = new Set(getAllPossiblePairs(allData[0][1]))
+          const votedPairs = new Set(allData[1])
+          const resultSet = new Set([...possiblePairs].filter(x => !votedPairs.has(x)))
+
+          var result = []
+          resultSet.forEach((value1, value2, set) => {
+            var valueArr = JSON.parse(value1)
+            result.push([allPairs[valueArr[0]], allPairs[valueArr[1]]])
+          })
+          res.send(result)
         })
+        // conn.query('SELECT a.*, b.location, ' +
+        // // '((SELECT COUNT(*) FROM following WHERE followingUserId = a.userId AND followerUserId = :userId) > 0) AS following, ' +
+        // // '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = a.userId) > 0) AS followsYou, ' +
+        // // '(a.userId = :userId) AS isPoster, '  +
+        // // '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) AND DAY(dateTime) = DAY(a.dateTime) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
+        // 'FROM posts AS a ' +
+        // 'JOIN users AS b ON b.userId = a.userId ' +
+        // 'WHERE a.dateTime >= CURRENT_DATE() AND a.mediaId NOT IN (SELECT lossMediaId FROM votes WHERE userId = :userId) ' +
+        // 'ORDER BY a.dateTime DESC LIMIT 20', {userId: userId}, function(err, result) {
+        //   if (err) {
+        //     console.log(err);
+        //     res.send({message: 'error'})
+        //   } else {
+        //     var length = result.length
+        //     if (length % 2 !== 0) {
+        //       length -= 1
+        //     }
+        //     var battleTuples = []
+        //     for (var i = 0; i + 1 < length; i += 2) {
+        //       battleTuples.push([result[i], result[i+1]])
+        //     }
+        //     res.send(battleTuples)
+        //   }
+        // })
       } else {
         conn.query('SELECT a.*, b.location FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
-        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY NOW() - a.dateTime ASC LIMIT 20', [], function(err, result) {
+        'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY a.dateTime ASC LIMIT 20', [], function(err, result) {
           if (err) {
             console.log(err);
             res.send({message: 'error'})
@@ -53,6 +66,28 @@ module.exports = function(conn, loggedIn) {
           }
         })
       }
+    })
+
+    battleRoutes.get('/:dateTime', (req, res) => {
+      console.log('- Request received:', req.method.cyan, '/api/battles/' + req.params.dateTime);
+      conn.query('SELECT a.*, b.location FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
+      'WHERE a.dateTime > :dateTime AND a.dateTime <= NOW() ORDER BY a.dateTime ASC LIMIT 20', {dateTime: req.params.dateTime}, function(err, result) {
+        if (err) {
+          console.log(err);
+          res.send({message: 'error'})
+        } else {
+          console.log(result);
+          var length = result.length
+          if (length % 2 !== 0) {
+            length -= 1
+          }
+          var battleTuples = []
+          for (var i = 0; i + 1 < length; i += 2) {
+            battleTuples.push([result[i], result[i + 1]])
+          }
+          res.send(battleTuples)
+        }
+      })
     })
 
     battleRoutes.post('/vote', (req, res) => {
@@ -78,6 +113,58 @@ module.exports = function(conn, loggedIn) {
         }
       })
     })
+
+    function getAllPosts() {
+      return new Promise(function(resolve, reject) {
+        conn.query('SELECT * FROM posts WHERE DAY(dateTime) = DAY(NOW())', [], function(err, result) {
+          if (err) {
+            return reject(err);
+          } else {
+            var posts = []
+            var mediaIds = []
+            for (var i = 0; i < result.length; i++) {
+              var row = result[i]
+              mediaIds.push(row.mediaId * 1)
+              posts[row.mediaId * 1] = {mediaId: row.mediaId, userId: row.userId, imageUrl: row.imageUrl, profileName: row.profileName, wins: row.wins, matches: row.matches, dateTime: row.dateTime}
+            }
+            return resolve([posts, mediaIds])
+          }
+        })
+      });
+    }
+
+    function getVotedPairs(userId) {
+      return new Promise(function(resolve, reject) {
+        conn.query('SELECT winMediaId, lossMediaId FROM votes WHERE userId = :userId AND DAY(dateTime) = DAY(NOW())', {userId: userId}, function(err, result) {
+          if (err) {
+            return reject(err)
+          } else {
+            var pairMediaIds = []
+            for (var i = 0; i < result.length; i++) {
+              var winMediaId = result[i].winMediaId * 1
+              var lossMediaId = result[i].lossMediaId * 1
+
+              if (winMediaId > lossMediaId) {
+                pairMediaIds.push(JSON.stringify([lossMediaId, winMediaId]))
+              } else {
+                pairMediaIds.push(JSON.stringify([winMediaId, lossMediaId]))
+              }
+            }
+            return resolve(pairMediaIds)
+          }
+        })
+      });
+    }
+
+    function getAllPossiblePairs(mediaIds) {
+      var result = []
+      for (var i = 0; i < mediaIds.length - 1; i++) {
+        for (var j = i + 1; j < mediaIds.length; j++) {
+          result.push(JSON.stringify([mediaIds[i], mediaIds[j]]))
+        }
+      }
+      return result
+    }
 
 
     return battleRoutes;

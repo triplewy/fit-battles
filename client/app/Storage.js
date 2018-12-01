@@ -7,8 +7,8 @@ export function setCookie(cookie) {
       CookieManager.set({
         name: 'connect.sid',
         value: cookie.substring(12),
-        domain: '192.168.1.14',
-        origin: '192.168.1.14',
+        domain: '10.38.17.49',
+        origin: '10.38.17.49',
         path: '/',
         version: '1',
         expiration: '2020-01-01T12:00:00.00-00:00'
@@ -74,6 +74,28 @@ export function lastVisit() {
       })
     }).catch(e => {
       console.log(e);
+    })
+  })
+}
+
+export function getLatestDate(dateTime) {
+  return new Promise(function(resolve, reject) {
+    AsyncStorage.getItem('latestDatetime').then(value => {
+      return resolve(value)
+    })
+    .catch(err => {
+      return reject(err)
+    })
+  })
+}
+
+export function storeLatestDate(dateTime) {
+  return new Promise(function(resolve, reject) {
+    AsyncStorage.setItem('latestDatetime', dateTime).then(() => {
+      return resolve({message: 'success'})
+    })
+    .catch(err => {
+      return reject(err)
     })
   })
 }
