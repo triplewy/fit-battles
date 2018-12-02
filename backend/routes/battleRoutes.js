@@ -23,30 +23,6 @@ module.exports = function(conn, loggedIn) {
           })
           res.send(result)
         })
-        // conn.query('SELECT a.*, b.location, ' +
-        // // '((SELECT COUNT(*) FROM following WHERE followingUserId = a.userId AND followerUserId = :userId) > 0) AS following, ' +
-        // // '((SELECT COUNT(*) FROM following WHERE followingUserId = :userId AND followerUserId = a.userId) > 0) AS followsYou, ' +
-        // // '(a.userId = :userId) AS isPoster, '  +
-        // // '(SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) AND DAY(dateTime) = DAY(a.dateTime) > (a.wins * 1.0 / a.matches)) AS dailyRank ' +
-        // 'FROM posts AS a ' +
-        // 'JOIN users AS b ON b.userId = a.userId ' +
-        // 'WHERE a.dateTime >= CURRENT_DATE() AND a.mediaId NOT IN (SELECT lossMediaId FROM votes WHERE userId = :userId) ' +
-        // 'ORDER BY a.dateTime DESC LIMIT 20', {userId: userId}, function(err, result) {
-        //   if (err) {
-        //     console.log(err);
-        //     res.send({message: 'error'})
-        //   } else {
-        //     var length = result.length
-        //     if (length % 2 !== 0) {
-        //       length -= 1
-        //     }
-        //     var battleTuples = []
-        //     for (var i = 0; i + 1 < length; i += 2) {
-        //       battleTuples.push([result[i], result[i+1]])
-        //     }
-        //     res.send(battleTuples)
-        //   }
-        // })
       } else {
         conn.query('SELECT a.*, b.location FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
         'WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY a.dateTime ASC LIMIT 20', [], function(err, result) {
@@ -70,7 +46,7 @@ module.exports = function(conn, loggedIn) {
 
     battleRoutes.get('/:dateTime', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/battles/' + req.params.dateTime);
-      conn.query('SELECT a.*, b.location FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
+      conn.query('SELECT a.*, b.* FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
       'WHERE a.dateTime > :dateTime AND a.dateTime <= NOW() ORDER BY a.dateTime ASC LIMIT 20', {dateTime: req.params.dateTime}, function(err, result) {
         if (err) {
           console.log(err);
@@ -116,7 +92,7 @@ module.exports = function(conn, loggedIn) {
 
     function getAllPosts() {
       return new Promise(function(resolve, reject) {
-        conn.query('SELECT * FROM posts WHERE DAY(dateTime) = DAY(NOW())', [], function(err, result) {
+        conn.query('SELECT a.*, b.* FROM posts AS a JOIN users AS b ON b.userId = a.userId WHERE DAY(a.dateTime) = DAY(NOW())', [], function(err, result) {
           if (err) {
             return reject(err);
           } else {
@@ -125,7 +101,16 @@ module.exports = function(conn, loggedIn) {
             for (var i = 0; i < result.length; i++) {
               var row = result[i]
               mediaIds.push(row.mediaId * 1)
-              posts[row.mediaId * 1] = {mediaId: row.mediaId, userId: row.userId, imageUrl: row.imageUrl, profileName: row.profileName, wins: row.wins, matches: row.matches, dateTime: row.dateTime}
+              posts[row.mediaId * 1] = {
+                mediaId: row.mediaId,
+                userId: row.userId,
+                imageUrl: row.imageUrl,
+                profileName: row.profileName,
+                location: row.location,
+                wins: row.wins,
+                matches: row.matches,
+                dateTime: row.dateTime
+              }
             }
             return resolve([posts, mediaIds])
           }

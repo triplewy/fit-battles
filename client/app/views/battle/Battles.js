@@ -34,6 +34,7 @@ export default class Battles extends React.Component {
   refreshBattles() {
     this.setState({refreshing: true}, () => {
       if (this.props.state.auth) {
+        console.log(global.API_URL);
         fetch(global.API_URL + '/api/battles', {
           credentials: 'include'
         })
@@ -96,6 +97,7 @@ export default class Battles extends React.Component {
   }
 
   fetchBattlesHelper(datetimeQuery) {
+    console.log(global.API_URL);
     fetch(global.API_URL + '/api/battles' + datetimeQuery, {
       credentials: 'include'
     })

@@ -4,12 +4,9 @@ module.exports = function(conn, loggedIn) {
 
     winnerRoutes.get('/', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/winner');
-      var userId = null;
-      if (req.user) {
-        userId = req.user
-      }
-
-      conn.query('SELECT *, 0 AS dailyRank FROM posts WHERE dateTime < CURRENT_DATE() AND dateTime >= SUBDATE(CURRENT_DATE(), 1) ORDER BY wins * 1.0 / matches DESC LIMIT 1', [], function(err, result) {
+      
+      conn.query('SELECT a.*, b.*, 0 AS dailyRank FROM posts AS a JOIN users AS b ON b.userId = a.userId ' +
+      'WHERE a.dateTime < CURRENT_DATE() AND a.dateTime >= SUBDATE(CURRENT_DATE(), 1) ORDER BY a.wins * 1.0 / a.matches DESC LIMIT 1', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {

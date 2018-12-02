@@ -36,10 +36,9 @@ module.exports = function(conn, loggedIn) {
       console.log('- Request received:', req.method.cyan, '/api/profile/feed/page=' + req.params.page);
       const userId = req.user
       const start = req.params.page * 10
-      conn.query('SELECT a.*, true AS isPoster, DAY(a.dateTime) = DAY(NOW()) AS postedToday, ' +
-      // '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
+      conn.query('SELECT a.*, b.*, true AS isPoster, DAY(a.dateTime) = DAY(NOW()) AS postedToday, ' +
       '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(a.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN a.matches = 0 THEN 0 ELSE a.wins * 1.0 / a.matches END)) AS dailyRank ' +
-      'FROM posts AS a WHERE a.userId = :userId ORDER BY a.dateTime DESC LIMIT ' + start + ', 10', {userId: userId}, function(err, result) {
+      'FROM posts AS a JOIN users AS b ON b.userId = a.userId WHERE a.userId = ? ORDER BY a.dateTime DESC LIMIT ?, 10', [userId, start], function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -56,10 +55,9 @@ module.exports = function(conn, loggedIn) {
       }
       const profileId = req.params.userId
       const start = req.params.page * 10
-      conn.query('SELECT a.*, a.userId = :userId AS isPoster, DAY(a.dateTime) = DAY(NOW()) AS postedToday, ' +
-      // '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.mediaId OR lossMediaId = a.mediaId)) > 0) AS voted, ' +
+      conn.query('SELECT a.*, b.*, a.userId = ? AS isPoster, DAY(a.dateTime) = DAY(NOW()) AS postedToday, ' +
       '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(a.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN a.matches = 0 THEN 0 ELSE a.wins * 1.0 / a.matches END)) AS dailyRank ' +
-      'FROM posts AS a WHERE a.userId = :profileId ORDER BY a.dateTime DESC LIMIT ' + start + ', 10', {userId: userId, profileId: profileId}, function(err, result) {
+      'FROM posts AS a JOIN users AS b ON b.userId = a.userId WHERE a.userId = ? ORDER BY a.dateTime DESC LIMIT ?, 10', [userId, profileId, start], function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -71,9 +69,9 @@ module.exports = function(conn, loggedIn) {
     profileRoutes.get('/votes', loggedIn, (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/profile/votes');
       const userId = req.user
-      conn.query('SELECT b.*, true AS voted, DAY(b.dateTime) = DAY(NOW()) AS postedToday, ' +
+      conn.query('SELECT b.*, c.*, DAY(b.dateTime) = DAY(NOW()) AS postedToday, ' +
       '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(b.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN b.matches = 0 THEN 0 ELSE b.wins * 1.0 / b.matches END)) AS dailyRank ' +
-      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :userId ORDER BY dateTime DESC LIMIT 10', {userId: userId}, function(err, result) {
+      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId JOIN users AS c ON c.userId = b.userId WHERE a.userId = :userId ORDER BY dateTime DESC LIMIT 10', {userId: userId}, function(err, result) {
         if (err) {
           console.log(err);
         } else {
@@ -90,10 +88,9 @@ module.exports = function(conn, loggedIn) {
       }
       const profileId = req.params.userId
 
-      conn.query('SELECT b.*, DAY(b.dateTime) = DAY(NOW()) AS postedToday, ' +
-      // '((SELECT COUNT(*) FROM votes WHERE userId = :userId AND (winMediaId = a.winMediaId OR lossMediaId = a.winMediaId)) > 0) AS voted, ' +
+      conn.query('SELECT b.*, c.*, DAY(b.dateTime) = DAY(NOW()) AS postedToday, ' +
       '(SELECT COUNT(*) FROM posts WHERE DAY(dateTime) = DAY(b.dateTime) AND (wins * 1.0 / matches) > (CASE WHEN b.matches = 0 THEN 0 ELSE b.wins * 1.0 / b.matches END)) AS dailyRank ' +
-      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId WHERE a.userId = :profileId ORDER BY dateTime DESC LIMIT 10', {userId: userId, profileId: profileId}, function(err, result) {
+      'FROM votes AS a JOIN posts AS b ON b.mediaId = a.winMediaId JOIN users AS c ON c.userId = b.userId WHERE a.userId = :profileId ORDER BY dateTime DESC LIMIT 10', {profileId: profileId}, function(err, result) {
         if (err) {
           console.log(err);
         } else {
