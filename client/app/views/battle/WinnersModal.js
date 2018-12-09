@@ -1,6 +1,6 @@
 import React from 'react';
 import {Dimensions, Image, View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator} from 'react-native';
-import { lastVisit } from '../../Storage'
+import { lastVisit, storeLastVisit } from '../../Storage'
 import LinearGradient from 'react-native-linear-gradient'
 import FeedCard from '../feed/FeedCard'
 import Modal from 'react-native-modal'
@@ -24,12 +24,15 @@ export default class WinnerModal extends React.Component {
 
   fetchLastVisit() {
     lastVisit().then(data => {
+      console.log(data);
       if (data.lastVisit === 'never') {
         this.props.navigation.navigate('Instructions')
       } else if (data.lastVisit === 'not today') {
         this.fetchWinners()
         this.setState({showModal: true})
       }
+
+      storeLastVisit()
     })
   }
 

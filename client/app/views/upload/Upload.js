@@ -31,7 +31,6 @@ export default class Upload extends React.Component {
         // You can also display the image using data:
         // const source = { uri: 'data:image/jpeg;base64,' + response.data };
         const win = Dimensions.get('window');
-        console.log("here1");
         // this.props.navigation.navigate('SelectedPhoto', {uri: response.uri})
 
         ImageResizer.createResizedImage(response.uri, 1080, 1080 * 4 / 3, 'JPEG', 75).then((response) => {
@@ -39,7 +38,6 @@ export default class Upload extends React.Component {
           // response.path is the path of the new image
           // response.name is the name of the new image with the extension
           // response.size is the size of the new image
-          console.log("here2");
           this.setState({animating: false})
           this.props.navigation.navigate('SelectedPhoto', {uri: response.uri})
         }).catch((err) => {
@@ -53,7 +51,6 @@ export default class Upload extends React.Component {
 
   render() {
     const navigation = this.props.navigation
-    console.log(this.props);
     if (this.props.state.auth) {
       return (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>

@@ -33,7 +33,6 @@ export default class Leaderboard extends React.Component {
     .then(data => {
       console.log(data);
       if (this.props.API_URL !== '/api/leaderboard/daily') {
-        console.log('here');
         if (data.length > 0) {
           var wins = data[0].wins
           var rank = 1;

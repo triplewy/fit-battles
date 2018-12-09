@@ -34,7 +34,7 @@ export default class Splash extends React.Component {
     return (
       <LinearGradient colors={['#54d7ff', '#739aff']} style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <Animated.View style={{opacity: this.fadeValue}}>
-          <Image source={dripIcon} style={{height: 200, width: 200, marginBottom: 30}} />
+          <Image source={dripIcon} style={{height: 300, width: 300, marginBottom: 30}} />
           <Text style={{textAlign: 'center', fontSize: 28, fontWeight: '300', color: 'white'}}>Fit Battles</Text>
         </Animated.View>
       </LinearGradient>

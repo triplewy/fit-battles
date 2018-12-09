@@ -7,8 +7,10 @@ export function setCookie(cookie) {
       CookieManager.set({
         name: 'connect.sid',
         value: cookie.substring(12),
-        domain: 'ec2-18-223-124-212.us-east-2.compute.amazonaws.com',
-        origin: 'ec2-18-223-124-212.us-east-2.compute.amazonaws.com',
+        domain: '10.38.17.49',
+        origin: '10.38.17.49',
+        // domain: 'ec2-18-223-124-212.us-east-2.compute.amazonaws.com',
+        // origin: 'ec2-18-223-124-212.us-east-2.compute.amazonaws.com',
         path: '/',
         version: '1',
         expiration: '2020-01-01T12:00:00.00-00:00'
@@ -57,23 +59,29 @@ export function clearCookies() {
 export function lastVisit() {
   return new Promise(function(resolve, reject) {
     AsyncStorage.getItem('lastVisit').then(value => {
-      AsyncStorage.setItem('lastVisit', JSON.stringify(Date.now())).then(() => {
-        if (value !== null) {
-          const lastVisit = new Date(parseInt(value, 10))
-          const now = new Date()
-          if (lastVisit.getUTCDate() === now.getUTCDate()) {
-            return resolve({lastVisit: 'today'})
-          } else {
-            return resolve({lastVisitToday: 'not today'})
-          }
+      if (value !== null) {
+        const lastVisit = new Date(parseInt(value, 10))
+        const now = new Date()
+        if (lastVisit.getUTCDate() === now.getUTCDate()) {
+          return resolve({lastVisit: 'today'})
         } else {
-          return resolve({lastVisitToday: 'never'})
+          return resolve({lastVisitToday: 'not today'})
         }
-      }).catch(e => {
-        console.log(e);
-      })
+      } else {
+        return resolve({lastVisitToday: 'never'})
+      }
     }).catch(e => {
       console.log(e);
+    })
+  })
+}
+
+export function storeLastVisit() {
+  return new Promise(function(resolve, reject) {
+    AsyncStorage.setItem('lastVisit', JSON.stringify(Date.now())).then(() => {
+      return resolve('success')
+    }).catch(err => {
+      return reject(err)
     })
   })
 }

@@ -23,6 +23,7 @@ import BattlesInstructions from '../views/Instructions/BattlesInstructions'
 import VoteInstructions from '../views/Instructions/VoteInstructions'
 import RankingsInstructions from '../views/Instructions/RankingsInstructions'
 import Final from '../views/Instructions/Final'
+import WinnersModal from '../views/battle/WinnersModal'
 import leaderboardIconActive from '../icons/leaderboard-icon-active.png'
 import leaderboardIconUnactive from '../icons/leaderboard-icon-unactive.png'
 import accountIconActive from '../icons/account-icon-active.png'
@@ -37,7 +38,6 @@ import cameraIcon from '../icons/camera-icon.png'
 export default class TabNavigator extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
     this.state = {
       loading: true,
       animationEnded: false
@@ -157,13 +157,6 @@ export default class TabNavigator extends React.Component {
         }
       }
     )
-
-    // const BattleSwitchNavigator = createSwitchNavigator(
-    //   {
-    //     Battle: BattleNavigation,
-    //     Instructions: InstructionsNavigator
-    //   }
-    // )
 
     const LeaderboardNavigator = createStackNavigator(
       {
@@ -368,6 +361,7 @@ export default class TabNavigator extends React.Component {
         return (
           <View style={{flex: 1}}>
             <StatusBar barStyle="light-content" />
+            <WinnersModal {...this.props} />
             <Tabs />
           </View>
         )

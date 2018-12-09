@@ -71,8 +71,8 @@ module.exports = function(conn, loggedIn) {
     leaderboardRoutes.get('/daily/page=:page', (req, res) => {
       console.log('- Request received:', req.method.cyan, '/api/leaderboard/daily/page=' + req.params.page);
       const start = req.params.page * 10
-      conn.query('SELECT a.*, b.*, true AS postedToday, (SELECT COUNT(*) FROM posts WHERE (wins * 1.0 / matches) > (CASE WHEN a.matches = 0 THEN 0 ELSE a.wins * 1.0 / a.matches END)) AS dailyRank ' +
-      'FROM posts AS a JOIN users AS b ON b.userId = a.userId WHERE a.dateTime >= CURRENT_DATE() AND a.dateTime <= NOW() ORDER BY a.wins * 1.0 / a.matches DESC LIMIT ' + start + ', 10', [], function(err, result) {
+      conn.query('SELECT a.*, b.*, true AS postedToday, (SELECT COUNT(*) FROM posts WHERE dateTime >= CURRENT_DATE() AND (wins * 1.0 / matches) > (CASE WHEN a.matches = 0 THEN 0 ELSE a.wins * 1.0 / a.matches END)) AS dailyRank ' +
+      'FROM posts AS a JOIN users AS b ON b.userId = a.userId WHERE a.dateTime >= CURRENT_DATE() ORDER BY a.wins * 1.0 / a.matches DESC LIMIT ' + start + ', 10', [], function(err, result) {
         if (err) {
           console.log(err);
         } else {

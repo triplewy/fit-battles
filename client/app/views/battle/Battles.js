@@ -1,11 +1,8 @@
 import React from 'react';
-import { Dimensions, SafeAreaView, ScrollView, RefreshControl, View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { lastVisit, getLatestDate, storeLatestDate } from '../../Storage'
+import { Dimensions, ScrollView, RefreshControl, View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { getLatestDate, storeLatestDate } from '../../Storage'
 import Card from './Card'
-import FeedCard from '../feed/FeedCard'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
-import LinearGradient from 'react-native-linear-gradient'
-import WinnersModal from './WinnersModal'
 
 export default class Battles extends React.Component {
   constructor(props) {
@@ -17,7 +14,6 @@ export default class Battles extends React.Component {
       activeSlide: 0,
       endOfBattles: false,
       refreshing: false,
-      showModal: false
     };
 
     this.refreshBattles = this.refreshBattles.bind(this)
@@ -34,7 +30,6 @@ export default class Battles extends React.Component {
   refreshBattles() {
     this.setState({refreshing: true}, () => {
       if (this.props.state.auth) {
-        console.log(global.API_URL);
         fetch(global.API_URL + '/api/battles', {
           credentials: 'include'
         })
@@ -97,7 +92,6 @@ export default class Battles extends React.Component {
   }
 
   fetchBattlesHelper(datetimeQuery) {
-    console.log(global.API_URL);
     fetch(global.API_URL + '/api/battles' + datetimeQuery, {
       credentials: 'include'
     })
@@ -172,32 +166,7 @@ export default class Battles extends React.Component {
     });
   }
 
-  get pagination () {
-   const { battleData, currentBattle, activeSlide } = this.state;
-   return (
-       <Pagination
-         dotsLength={battleData[currentBattle].length}
-         activeDotIndex={activeSlide}
-         containerStyle={{ backgroundColor: 'transparent'}}
-         dotStyle={{
-             width: 8,
-             height: 8,
-             borderRadius: 5,
-             marginHorizontal: 2,
-             marginVertical: 5,
-             backgroundColor: '#739aff'
-         }}
-         inactiveDotStyle={{
-             // Define styles for inactive dots here
-         }}
-         inactiveDotOpacity={0.4}
-         inactiveDotScale={0.6}
-       />
-   );
-   }
-
   render() {
-    const battleData = this.state.battleData
     const win = Dimensions.get('window');
 
     if (this.state.endOfBattles) {
@@ -228,17 +197,23 @@ export default class Battles extends React.Component {
               />
             }
           >
-              <WinnersModal {...this.props} />
-              <Carousel
-                ref={(c) => { this.carousel = c }}
-                data={this.state.battleData[this.state.currentBattle]}
-                renderItem={this.renderItem}
-                sliderWidth={win.width}
-                itemWidth={win.width}
-                onSnapToItem={(index) => this.setState({activeSlide: index})}
-                layout={'default'}
-              />
-              {this.pagination}
+            <Carousel
+              ref={(c) => { this.carousel = c }}
+              data={this.state.battleData[this.state.currentBattle]}
+              renderItem={this.renderItem}
+              sliderWidth={win.width}
+              itemWidth={win.width}
+              onSnapToItem={(index) => this.setState({activeSlide: index})}
+              layout={'default'}
+            />
+            <Pagination
+              dotsLength={this.state.battleData[this.state.currentBattle].length}
+              activeDotIndex={this.state.activeSlide}
+              containerStyle={{ backgroundColor: 'transparent'}}
+              dotStyle={{width: 8, height: 8, borderRadius: 5, marginHorizontal: 2, marginVertical: 5, backgroundColor: '#739aff'}}
+              inactiveDotOpacity={0.4}
+              inactiveDotScale={0.6}
+            />
           </ScrollView>
         )
       } else {
@@ -251,11 +226,3 @@ export default class Battles extends React.Component {
     }
   }
 }
-const styles = StyleSheet.create({
-  textFirst: {
-    fontSize: 50,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 300,
-  }
-});

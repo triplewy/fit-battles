@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS votes (
 );
 
 DELIMITER //
-
 CREATE TRIGGER after_votes_insert
 AFTER INSERT ON votes FOR EACH ROW
 BEGIN
@@ -58,5 +57,4 @@ BEGIN
   UPDATE posts SET wins = @winPostWins, matches = @winPostMatches WHERE mediaId = NEW.winMediaId;
   UPDATE posts SET matches = @lossPostMatches WHERE mediaId = NEW.lossMediaId;
   END //
-
 DELIMITER ;
